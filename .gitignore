@@ -3,3 +3,7 @@ build/
 .DS_Store
 *.xcodeproj
 .swiftpm/
+videos/**/node_modules/
+videos/**/renders/
+videos/**/snapshots/
+videos/**/.hyperframes/cache/

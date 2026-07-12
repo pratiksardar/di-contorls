@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- head is source-file metadata only; the runtime clones <template> contents -->
+  </head>
+  <body>
+    <template>
+      <style>
+        /* Root styled via #root — never a class on the composition root */
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          font-family: "SF Pro Display", system-ui, sans-serif;
+          color: #ffffff;
+        }
+        /* full-bleed ground lives on a clip layer, never on #root */
+        .f6-bg {
+          position: absolute;
+          inset: 0;
+          background: #000000;
+        }
+        .f6-stage {
+          position: absolute;
+          inset: 0;
+        }
+        .f6-mono {
+          font-family: ui-monospace, "SF Mono", Menlo, monospace;
+          text-transform: uppercase;
+          letter-spacing: 0.14em;
+        }
+
+        /* ---------- left rail (40%) ---------- */
+        .f6-rail {
+          position: absolute;
+          left: 140px;
+          top: 316px;
+          width: 660px;
+        }
+        #f6-kicker {
+          font-size: 17px;
+          font-weight: 500;
+          color: #ff9f0a;
+          opacity: 0;
+        }
+        #f6-display {
+          margin-top: 26px;
+          font-size: 104px;
+          font-weight: 900;
+          line-height: 0.95;
+          letter-spacing: -0.04em;
+          text-transform: lowercase;
+          color: #ffffff;
+          opacity: 0;
+        }
+        #f6-display .f6-dot-accent {
+          color: #ff9f0a;
+        }
+        .f6-cues {
+          margin-top: 64px;
+          display: flex;
+          flex-direction: column;
+          gap: 26px;
+        }
+        .f6-cue {
+          font-size: 23px;
+          font-weight: 500;
+          color: #ffffff;
+          opacity: 0;
+          display: block;
+        }
+        .f6-cue .f6-slash {
+          color: #ff9f0a;
+          margin-right: 14px;
+        }
+
+        /* ---------- island panel hero (right 60%) ---------- */
+        #f6-panel {
+          position: absolute;
+          left: 980px;
+          top: 200px;
+          width: 760px;
+          background: #1a1918;
+          border: 1px solid #282726;
+          border-radius: 22px;
+          overflow: hidden;
+          opacity: 0;
+        }
+        .f6-head {
+          height: 58px;
+          background: #000000;
+          display: flex;
+          align-items: center;
+          padding: 0 24px;
+          gap: 14px;
+          border-bottom: 1px solid #282726;
+        }
+        .f6-head svg {
+          display: block;
+        }
+        .f6-camdot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #32d74b;
+        }
+        .f6-head-name {
+          font-size: 13px;
+          color: rgba(255, 255, 255, 0.4);
+          margin-left: 6px;
+        }
+        #f6-live {
+          margin-left: auto;
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          font-size: 13px;
+          color: #ff9f0a;
+          opacity: 0.55;
+        }
+        #f6-livedot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #ff9f0a;
+          display: block;
+        }
+        .f6-list {
+          position: relative;
+          margin: 24px;
+          height: 424px;
+        }
+        .f6-slot {
+          position: absolute;
+          left: 0;
+          width: 100%;
+          height: 92px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .f6-row {
+          position: absolute;
+          left: 0;
+          width: 100%;
+          height: 92px;
+          display: flex;
+          align-items: center;
+          gap: 18px;
+          padding: 0 18px;
+          box-sizing: border-box;
+          border-radius: 10px;
+          opacity: 0;
+        }
+        .f6-row-blocked {
+          background: rgba(255, 159, 10, 0.07);
+          border: 1px solid rgba(255, 159, 10, 0.28);
+        }
+        .f6-status {
+          width: 11px;
+          height: 11px;
+          border-radius: 50%;
+          flex: none;
+        }
+        .f6-name {
+          font-size: 26px;
+          font-weight: 600;
+          color: rgba(255, 255, 255, 0.9);
+        }
+        .f6-meta {
+          margin-left: auto;
+          font-size: 15px;
+          font-weight: 500;
+          color: rgba(255, 255, 255, 0.4);
+        }
+        #f6-capsule {
+          display: inline-block;
+          background: #ff9f0a;
+          color: rgba(17, 17, 17, 0.9);
+          font-size: 13px;
+          font-weight: 700;
+          padding: 6px 14px;
+          border-radius: 999px;
+          opacity: 0;
+        }
+        #f6-check {
+          display: inline-block;
+          width: 26px;
+          height: 26px;
+          border-radius: 50%;
+          background: rgba(50, 215, 75, 0.16);
+          color: #32d74b;
+          font-size: 15px;
+          font-weight: 700;
+          line-height: 26px;
+          text-align: center;
+          flex: none;
+        }
+      </style>
+
+      <div
+        id="root"
+        data-composition-id="06-fleet"
+        data-width="1920"
+        data-height="1080"
+        data-duration="5.407"
+      >
+        <!-- full-bleed ground (clip layer, lowest track) -->
+        <div class="f6-bg clip" data-start="0" data-duration="5.407" data-track-index="0"></div>
+
+        <!-- single full-duration content layer; GSAP owns all reveals -->
+        <div class="f6-stage clip" data-start="0" data-duration="5.407" data-track-index="1">
+          <!-- left mono caption rail -->
+          <div class="f6-rail">
+            <div id="f6-kicker" class="f6-mono">live sessions</div>
+            <div id="f6-display">the fleet<span class="f6-dot-accent">.</span></div>
+            <div class="f6-cues">
+              <div class="f6-cue f6-mono" id="f6-cue-working"><span class="f6-slash">/</span>working</div>
+              <div class="f6-cue f6-mono" id="f6-cue-blocked"><span class="f6-slash">/</span>blocked</div>
+              <div class="f6-cue f6-mono" id="f6-cue-done"><span class="f6-slash">/</span>done</div>
+            </div>
+          </div>
+
+          <!-- expanded island — recreated UI, larger than life -->
+          <div id="f6-panel">
+            <div class="f6-head">
+              <svg width="15" height="21" viewBox="0 0 15 21" fill="none">
+                <rect x="4.5" y="0.5" width="6" height="11" rx="3" fill="rgba(255,255,255,0.9)" />
+                <path d="M1.5 9.5c0 3.6 2.6 6 6 6s6-2.4 6-6" stroke="rgba(255,255,255,0.9)" stroke-width="1.6" stroke-linecap="round" fill="none" />
+                <path d="M7.5 15.5v4" stroke="rgba(255,255,255,0.9)" stroke-width="1.6" stroke-linecap="round" />
+              </svg>
+              <span class="f6-camdot"></span>
+              <span class="f6-head-name f6-mono">notchcontrols · sessions</span>
+              <span id="f6-live" class="f6-mono"><span id="f6-livedot"></span>live</span>
+            </div>
+            <div class="f6-list">
+              <!-- empty slot hairlines: the list seats empty, rows populate on cue -->
+              <div class="f6-slot" style="top: 0"></div>
+              <div class="f6-slot" style="top: 108px"></div>
+              <div class="f6-slot" style="top: 216px"></div>
+              <div class="f6-slot" style="top: 324px; border-bottom: none"></div>
+
+              <div class="f6-row" id="f6-row-working" style="top: 0">
+                <span class="f6-status" style="background: #32d74b"></span>
+                <span class="f6-name">claude · api</span>
+                <span class="f6-meta f6-mono">working — 2h 41m</span>
+              </div>
+              <div class="f6-row f6-row-blocked" id="f6-row-blocked" style="top: 108px">
+                <span class="f6-status" style="background: #ff9f0a"></span>
+                <span class="f6-name">claude · web</span>
+                <span id="f6-capsule" class="f6-mono">needs you</span>
+                <span class="f6-meta f6-mono">waiting 22m</span>
+              </div>
+              <div class="f6-row" id="f6-row-done" style="top: 216px">
+                <span id="f6-check">✓</span>
+                <span class="f6-name">codex · infra</span>
+                <span class="f6-meta f6-mono">done</span>
+              </div>
+              <div class="f6-row" id="f6-row-idle" style="top: 324px">
+                <span class="f6-status" style="background: #504d48"></span>
+                <span class="f6-name" style="color: rgba(255, 255, 255, 0.45)">claude · docs</span>
+                <span class="f6-meta f6-mono">idle</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+      <script>
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // Frame 6 — the whole fleet. duration 4.907s (authoritative).
+        // Scene windows scaled 4.907/7.0: S1 0–1.26 · S2 1.26–3.23 · S3 3.23–4.91
+        const ROW_H = 108; // slot pitch for the FLIP reorder
+
+        /* ---- Scene 1 (0–1.26): rail + empty island panel seats ---- */
+        tl.fromTo("#f6-kicker", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.08);
+        tl.fromTo("#f6-display", { opacity: 0, y: 34 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 0.26);
+        // "every session on your machine" — empty list panel scale-settles
+        tl.fromTo(
+          "#f6-panel",
+          { opacity: 0, y: 28, scale: 0.93 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.75, ease: "power3.out" },
+          0.35
+        );
+
+        // "…live" (~1.55): the LIVE chip pulses once (asr-keyword-glow, single envelope)
+        tl.fromTo("#f6-live", { opacity: 0.55 }, { opacity: 1, duration: 0.15, ease: "power2.out" }, 1.55);
+        tl.to("#f6-live", { opacity: 0.8, duration: 0.4, ease: "power3.out" }, 1.9);
+        tl.fromTo("#f6-livedot", { scale: 1 }, { scale: 1.4, duration: 0.15, ease: "power2.out" }, 1.55);
+        tl.to("#f6-livedot", { scale: 1, duration: 0.35, ease: "power3.out" }, 1.8);
+
+        /* ---- rail cue helper: fade-up + karaoke glow envelope ----
+           asr-keyword-glow (karaoke color-lerp): attack to accent, release to rest */
+        function cue(sel, t) {
+          tl.fromTo(sel, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: "expo.out" }, t);
+          tl.fromTo(sel, { color: "#ffffff" }, { color: "#ff9f0a", duration: 0.18, ease: "power2.out" }, t);
+          tl.fromTo(sel, { scale: 1 }, { scale: 1.05, transformOrigin: "0% 50%", duration: 0.18, ease: "power2.out" }, t);
+          tl.to(sel, { color: "rgba(255,255,255,0.78)", scale: 1, duration: 0.45, ease: "power3.out" }, t + 0.5);
+        }
+
+        /* ---- Scene 2 (1.26–3.23): rows tick in, one per spoken cue ---- */
+        // "who's working" (~2.25): green working row
+        tl.fromTo("#f6-row-working", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.55, ease: "expo.out" }, 2.25);
+        cue("#f6-cue-working", 2.28);
+
+        // "who's blocked" (~3.05): orange row + needs-you capsule
+        tl.fromTo("#f6-row-blocked", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.55, ease: "expo.out" }, 3.05);
+        tl.fromTo("#f6-capsule", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.4, ease: "expo.out" }, 3.2);
+        cue("#f6-cue-blocked", 3.08);
+
+        /* ---- Scene 3 (3.23–4.91): FLIP sort, done card, idle row, hold ---- */
+        // blocked row sorts itself to the top — FLIP-style swap, smooth power3
+        tl.to("#f6-row-blocked", { y: -ROW_H, duration: 0.55, ease: "power3.inOut" }, 3.5);
+        tl.to("#f6-row-working", { y: ROW_H, duration: 0.55, ease: "power3.inOut" }, 3.5);
+
+        // "who's done" (~3.9): green ✓ done card
+        tl.fromTo("#f6-row-done", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.55, ease: "expo.out" }, 3.9);
+        tl.fromTo("#f6-check", { scale: 0.5 }, { scale: 1, duration: 0.4, ease: "power3.out" }, 3.95);
+        cue("#f6-cue-done", 3.93);
+
+        // dim idle row completes the picture
+        tl.fromTo("#f6-row-idle", { opacity: 0, x: 18 }, { opacity: 0.75, x: 0, duration: 0.5, ease: "power3.out" }, 4.3);
+
+        // hold the read — subtle jitter only (sine-wave-loop, low amplitude, finite)
+        tl.to("#f6-panel", { y: 1.6, duration: 0.28, ease: "sine.inOut" }, 4.35);
+        tl.to("#f6-panel", { y: 0, duration: 0.28, ease: "sine.inOut" }, 4.63);
+
+        window.__timelines["06-fleet"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

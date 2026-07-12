@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Frame 4 — The notch, on duty. All render-critical content lives inside <template>. -->
+  </head>
+  <body>
+    <template>
+      <style>
+        @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=IBM+Plex+Mono:wght@500&display=swap");
+
+        #root {
+          position: absolute;
+          inset: 0;
+          width: 1920px;
+          height: 1080px;
+          overflow: hidden;
+          font-family: "Inter", sans-serif;
+        }
+
+        /* Full-bleed ground — dedicated clip, never painted on #root */
+        .i4-bg {
+          position: absolute;
+          inset: 0;
+          background: #000000;
+        }
+
+        /* ---- ambient glow bloom (behind strip + island) ---- */
+        .i4-glow {
+          position: absolute;
+          z-index: 1;
+          left: 50%;
+          margin-left: -360px;
+          top: -180px;
+          width: 720px;
+          height: 460px;
+          background: radial-gradient(
+            closest-side,
+            rgba(255, 159, 10, 0.55) 0%,
+            rgba(255, 159, 10, 0.18) 45%,
+            transparent 72%
+          );
+          opacity: 0;
+          transform-origin: 50% 50%;
+          pointer-events: none;
+          will-change: transform, opacity;
+        }
+
+        /* ---- recreated island (slides out from UNDER the strip) ---- */
+        .i4-island {
+          position: absolute;
+          z-index: 2;
+          left: 50%;
+          margin-left: -280px;
+          top: 8px;
+          width: 560px;
+          height: 112px;
+          background: #050505;
+          border: 1px solid #282726;
+          border-radius: 28px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 96px;
+          box-sizing: border-box;
+        }
+        .i4-glyph {
+          width: 44px;
+          height: 44px;
+          opacity: 0; /* timeline reveals */
+        }
+        .i4-glyph svg {
+          width: 100%;
+          height: 100%;
+          display: block;
+          filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.25));
+        }
+
+        /* ---- recreated Mac menu-bar strip ---- */
+        .i4-strip {
+          position: absolute;
+          z-index: 5;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 76px;
+          background: #1a1918;
+          border-bottom: 1px solid #282726;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 36px;
+          box-sizing: border-box;
+        }
+        .i4-menu {
+          font-family: "IBM Plex Mono", monospace;
+          font-weight: 500;
+          font-size: 14px;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.35);
+        }
+        .i4-notch {
+          position: absolute;
+          left: 50%;
+          margin-left: -210px;
+          top: 0;
+          width: 420px;
+          height: 76px;
+          background: #000000;
+          border-radius: 0 0 24px 24px;
+        }
+
+        /* ---- accent underline under the notch (svg-path-draw) ---- */
+        .i4-underline {
+          position: absolute;
+          z-index: 4;
+          left: 50%;
+          margin-left: -240px;
+          top: 88px;
+          width: 480px;
+          height: 8px;
+          pointer-events: none;
+        }
+        .i4-underline path {
+          fill: none;
+          stroke: #ff9f0a;
+          stroke-width: 3;
+          stroke-linecap: round;
+        }
+
+        /* ---- Scene 1 headline ---- */
+        .i4-headline {
+          position: absolute;
+          z-index: 3;
+          left: 0;
+          width: 100%;
+          top: 400px;
+          text-align: center;
+          font-weight: 800;
+          font-size: 88px;
+          line-height: 1.1;
+          letter-spacing: -0.02em;
+          text-transform: lowercase;
+          color: rgba(255, 255, 255, 0.9);
+          opacity: 0; /* flash-in on cue */
+          transform-origin: 50% 50%;
+        }
+        .i4-headline .i4-accent {
+          color: #ff9f0a;
+        }
+
+        /* ---- Scene 3 wordmark + sub-line ---- */
+        .i4-wordmark {
+          position: absolute;
+          z-index: 3;
+          left: 0;
+          width: 100%;
+          top: 352px;
+          text-align: center;
+          font-weight: 900;
+          font-size: 200px;
+          line-height: 0.9;
+          letter-spacing: -0.04em;
+          text-transform: lowercase;
+          color: rgba(255, 255, 255, 0.9);
+          white-space: nowrap;
+        }
+        .i4-wordmark span {
+          display: inline-block;
+          opacity: 0; /* per-word stagger on cue */
+        }
+        .i4-subline {
+          position: absolute;
+          z-index: 3;
+          left: 0;
+          width: 100%;
+          top: 606px;
+          text-align: center;
+          font-family: "IBM Plex Mono", monospace;
+          font-weight: 500;
+          font-size: 24px;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: #ffffff;
+          opacity: 0; /* fades to 0.6 */
+        }
+      </style>
+
+      <div
+        id="root"
+        data-composition-id="04-intro"
+        data-width="1920"
+        data-height="1080"
+        data-duration="5.129"
+      >
+        <!-- full-duration ground -->
+        <div class="i4-bg clip" data-start="0" data-duration="5.129" data-track-index="0"></div>
+
+        <!-- glow sits behind island + strip -->
+        <div class="i4-glow" id="i4-glow"></div>
+
+        <!-- island (under the strip; slides down out of the notch) -->
+        <div class="i4-island" id="i4-island">
+          <div class="i4-glyph" id="i4-mic">
+            <!-- mic glyph, white -->
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <g fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.8" stroke-linecap="round">
+                <rect x="9" y="3" width="6" height="11" rx="3" fill="rgba(255,255,255,0.92)" stroke="none" />
+                <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0" />
+                <path d="M12 18v3" />
+              </g>
+            </svg>
+          </div>
+          <div class="i4-glyph" id="i4-cam">
+            <!-- camera glyph, white -->
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <g fill="rgba(255,255,255,0.92)">
+                <rect x="2.5" y="6.5" width="13" height="11" rx="2.5" />
+                <path d="M16.5 10.6l4.2-2.6a.6.6 0 0 1 .9.5v7a.6.6 0 0 1-.9.5l-4.2-2.6z" />
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <!-- menu-bar strip with centered notch cutout -->
+        <div class="i4-strip" id="i4-strip">
+          <div class="i4-menu">finder&nbsp;&nbsp;file&nbsp;&nbsp;edit&nbsp;&nbsp;view&nbsp;&nbsp;window</div>
+          <div class="i4-notch"></div>
+          <div class="i4-menu">2:47 pm</div>
+        </div>
+
+        <!-- accent underline beneath the notch -->
+        <svg class="i4-underline" viewBox="0 0 480 8" xmlns="http://www.w3.org/2000/svg">
+          <path id="i4-uline" d="M 4 4 L 476 4" />
+        </svg>
+
+        <!-- Scene 1 line -->
+        <div class="i4-headline" id="i4-headline">
+          <span class="i4-accent">one spot</span> your eyes never leave.
+        </div>
+
+        <!-- Scene 3 wordmark -->
+        <div class="i4-wordmark" id="i4-wordmark">
+          <span id="i4-w1">notch</span><span id="i4-w2">controls</span>
+        </div>
+        <div class="i4-subline" id="i4-subline">your notch, on duty</div>
+      </div>
+
+      <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+      <script>
+        window.__timelines = window.__timelines || {};
+
+        // Scene windows: storyboard estimates (0-2.0 / 2.0-4.2 / 4.2-6.0) scaled
+        // by 4.629/6.0 = 0.7715 per the Video direction's proportional rule.
+        const S2 = 1.543; // "Meet NotchControls" — text cuts away, island emerges
+        const S3 = 3.24; // wordmark assembles
+
+        const byId = (id) => document.getElementById(id);
+        const headline = byId("i4-headline");
+        const strip = byId("i4-strip");
+        const island = byId("i4-island");
+        const glow = byId("i4-glow");
+        const uline = byId("i4-uline");
+        const ulineSvg = document.querySelector(".i4-underline");
+
+        // svg-path-draw setup: dash = measured length, offset out of view
+        const len = uline.getTotalLength();
+        uline.style.strokeDasharray = String(len);
+        uline.style.strokeDashoffset = String(len);
+
+        const tl = gsap.timeline({ paused: true });
+
+        /* ── Scene 1 (0 → 1.543): strip seats; line lands on "one spot" ── */
+        tl.fromTo(
+          strip,
+          { y: -80 },
+          { y: 0, duration: 0.55, ease: "expo.out" },
+          0.03
+        );
+
+        // discrete-text-sequence hard-cut FLASH-in (no fade), then a smooth settle
+        tl.fromTo(headline, { opacity: 0 }, { opacity: 1, duration: 0.04, ease: "none" }, 0.5);
+        tl.fromTo(
+          headline,
+          { scale: 1.035 },
+          { scale: 1, duration: 0.65, ease: "power3.out" },
+          0.5
+        );
+
+        // accent underline draws beneath the notch on "one spot"
+        tl.to(uline, { strokeDashoffset: 0, duration: 0.5, ease: "power2.out" }, 0.62);
+
+        /* ── Scene 2 (1.543 → 3.24): hard cut away; island slides out ── */
+        tl.to(headline, { opacity: 0, duration: 0.03, ease: "none" }, S2);
+        tl.to(ulineSvg, { opacity: 0, duration: 0.22, ease: "power1.in" }, S2 + 0.05);
+
+        // island slides down out of the notch — uniform translate, long smooth tail
+        tl.fromTo(
+          island,
+          { y: -135 },
+          { y: 0, duration: 0.95, ease: "expo.out" },
+          S2 + 0.06
+        );
+
+        // ambient-glow-bloom, pulse-on-arrival: bloom past peak, settle lower (one bloom)
+        tl.fromTo(
+          glow,
+          { opacity: 0, scale: 0.85 },
+          { opacity: 0.26, scale: 1, duration: 0.8, ease: "power2.out" },
+          S2 + 0.08
+        );
+        tl.to(glow, { opacity: 0.12, scale: 1, duration: 0.6, ease: "power2.inOut" }, S2 + 0.9);
+
+        // mic + camera glyphs reveal as the island settles
+        tl.fromTo(
+          "#i4-mic",
+          { opacity: 0, y: 8 },
+          { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" },
+          S2 + 0.5
+        );
+        tl.fromTo(
+          "#i4-cam",
+          { opacity: 0, y: 8 },
+          { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" },
+          S2 + 0.64
+        );
+
+        /* ── Scene 3 (3.24 → 4.629): wordmark per-word stagger + sub-line ── */
+        tl.fromTo(
+          "#i4-w1",
+          { opacity: 0, y: 44 },
+          { opacity: 1, y: 0, duration: 0.75, ease: "power3.out" },
+          S3
+        );
+        tl.fromTo(
+          "#i4-w2",
+          { opacity: 0, y: 44 },
+          { opacity: 1, y: 0, duration: 0.75, ease: "power3.out" },
+          S3 + 0.16
+        );
+        tl.fromTo(
+          "#i4-subline",
+          { opacity: 0, y: 10 },
+          { opacity: 0.6, y: 0, duration: 0.5, ease: "power2.out" },
+          S3 + 0.56
+        );
+        // hold still to the cut — the root zoom-through transition owns the exit
+
+        window.__timelines["04-intro"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

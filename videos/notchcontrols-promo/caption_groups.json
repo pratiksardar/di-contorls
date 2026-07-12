@@ -1,0 +1,565 @@
+{
+  "total_duration_s": 45.845,
+  "width": 1920,
+  "height": 1080,
+  "groups": [
+    {
+      "id": "caption-group-0",
+      "frame": 5,
+      "start": 20.034,
+      "end": 21.184,
+      "text": "An agent needs",
+      "words": [
+        {
+          "id": "caption-word-0-0",
+          "text": "An",
+          "start": 20.034,
+          "end": 20.134
+        },
+        {
+          "id": "caption-word-0-1",
+          "text": "agent",
+          "start": 20.134,
+          "end": 20.664
+        },
+        {
+          "id": "caption-word-0-2",
+          "text": "needs",
+          "start": 20.664,
+          "end": 21.064
+        }
+      ]
+    },
+    {
+      "id": "caption-group-1",
+      "frame": 5,
+      "start": 21.524,
+      "end": 21.734,
+      "text": "you.",
+      "words": [
+        {
+          "id": "caption-word-1-0",
+          "text": "you.",
+          "start": 21.524,
+          "end": 21.734
+        }
+      ]
+    },
+    {
+      "id": "caption-group-2",
+      "frame": 5,
+      "start": 21.734,
+      "end": 22.364,
+      "text": "Your notch",
+      "words": [
+        {
+          "id": "caption-word-2-0",
+          "text": "Your",
+          "start": 21.734,
+          "end": 22.014
+        },
+        {
+          "id": "caption-word-2-1",
+          "text": "notch",
+          "start": 22.014,
+          "end": 22.364
+        }
+      ]
+    },
+    {
+      "id": "caption-group-3",
+      "frame": 5,
+      "start": 22.364,
+      "end": 22.804,
+      "text": "says so",
+      "words": [
+        {
+          "id": "caption-word-3-0",
+          "text": "says",
+          "start": 22.364,
+          "end": 22.644
+        },
+        {
+          "id": "caption-word-3-1",
+          "text": "so",
+          "start": 22.644,
+          "end": 22.744
+        }
+      ]
+    },
+    {
+      "id": "caption-group-4",
+      "frame": 5,
+      "start": 22.804,
+      "end": 23.234,
+      "text": "the second",
+      "words": [
+        {
+          "id": "caption-word-4-0",
+          "text": "the",
+          "start": 22.804,
+          "end": 22.884
+        },
+        {
+          "id": "caption-word-4-1",
+          "text": "second",
+          "start": 22.884,
+          "end": 23.234
+        }
+      ]
+    },
+    {
+      "id": "caption-group-5",
+      "frame": 5,
+      "start": 23.234,
+      "end": 24.274,
+      "text": "it happens.",
+      "words": [
+        {
+          "id": "caption-word-5-0",
+          "text": "it",
+          "start": 23.234,
+          "end": 23.364
+        },
+        {
+          "id": "caption-word-5-1",
+          "text": "happens.",
+          "start": 23.364,
+          "end": 24.164
+        }
+      ]
+    },
+    {
+      "id": "caption-group-6",
+      "frame": 5,
+      "start": 24.274,
+      "end": 24.624,
+      "text": "Click the",
+      "words": [
+        {
+          "id": "caption-word-6-0",
+          "text": "Click",
+          "start": 24.274,
+          "end": 24.454
+        },
+        {
+          "id": "caption-word-6-1",
+          "text": "the",
+          "start": 24.454,
+          "end": 24.594
+        }
+      ]
+    },
+    {
+      "id": "caption-group-7",
+      "frame": 5,
+      "start": 24.624,
+      "end": 25.144,
+      "text": "banner and",
+      "words": [
+        {
+          "id": "caption-word-7-0",
+          "text": "banner",
+          "start": 24.624,
+          "end": 24.974
+        },
+        {
+          "id": "caption-word-7-1",
+          "text": "and",
+          "start": 24.974,
+          "end": 25.144
+        }
+      ]
+    },
+    {
+      "id": "caption-group-8",
+      "frame": 5,
+      "start": 25.144,
+      "end": 25.584,
+      "text": "you're in",
+      "words": [
+        {
+          "id": "caption-word-8-0",
+          "text": "you're",
+          "start": 25.144,
+          "end": 25.374
+        },
+        {
+          "id": "caption-word-8-1",
+          "text": "in",
+          "start": 25.494,
+          "end": 25.584
+        }
+      ]
+    },
+    {
+      "id": "caption-group-9",
+      "frame": 5,
+      "start": 25.584,
+      "end": 26.764,
+      "text": "the right window.",
+      "words": [
+        {
+          "id": "caption-word-9-0",
+          "text": "the",
+          "start": 25.584,
+          "end": 25.844
+        },
+        {
+          "id": "caption-word-9-1",
+          "text": "right",
+          "start": 25.844,
+          "end": 26.054
+        },
+        {
+          "id": "caption-word-9-2",
+          "text": "window.",
+          "start": 26.054,
+          "end": 26.644
+        }
+      ]
+    },
+    {
+      "id": "caption-group-10",
+      "frame": 7,
+      "start": 31.644,
+      "end": 32.644,
+      "text": "The mute button,",
+      "words": [
+        {
+          "id": "caption-word-10-0",
+          "text": "The",
+          "start": 31.644,
+          "end": 31.804
+        },
+        {
+          "id": "caption-word-10-1",
+          "text": "mute",
+          "start": 31.804,
+          "end": 32.084
+        },
+        {
+          "id": "caption-word-10-2",
+          "text": "button,",
+          "start": 32.084,
+          "end": 32.644
+        }
+      ]
+    },
+    {
+      "id": "caption-group-11",
+      "frame": 7,
+      "start": 32.644,
+      "end": 33.064,
+      "text": "it's at",
+      "words": [
+        {
+          "id": "caption-word-11-0",
+          "text": "it's",
+          "start": 32.644,
+          "end": 32.924
+        },
+        {
+          "id": "caption-word-11-1",
+          "text": "at",
+          "start": 32.924,
+          "end": 33.064
+        }
+      ]
+    },
+    {
+      "id": "caption-group-12",
+      "frame": 7,
+      "start": 33.064,
+      "end": 33.704,
+      "text": "eye level.",
+      "words": [
+        {
+          "id": "caption-word-12-0",
+          "text": "eye",
+          "start": 33.064,
+          "end": 33.204
+        },
+        {
+          "id": "caption-word-12-1",
+          "text": "level.",
+          "start": 33.254,
+          "end": 33.654
+        }
+      ]
+    },
+    {
+      "id": "caption-group-13",
+      "frame": 7,
+      "start": 33.704,
+      "end": 34.384,
+      "text": "One click,",
+      "words": [
+        {
+          "id": "caption-word-13-0",
+          "text": "One",
+          "start": 33.704,
+          "end": 33.874
+        },
+        {
+          "id": "caption-word-13-1",
+          "text": "click,",
+          "start": 33.874,
+          "end": 34.384
+        }
+      ]
+    },
+    {
+      "id": "caption-group-14",
+      "frame": 7,
+      "start": 34.384,
+      "end": 35.554,
+      "text": "every app muted.",
+      "words": [
+        {
+          "id": "caption-word-14-0",
+          "text": "every",
+          "start": 34.384,
+          "end": 34.754
+        },
+        {
+          "id": "caption-word-14-1",
+          "text": "app",
+          "start": 34.754,
+          "end": 34.974
+        },
+        {
+          "id": "caption-word-14-2",
+          "text": "muted.",
+          "start": 34.974,
+          "end": 35.434
+        }
+      ]
+    },
+    {
+      "id": "caption-group-15",
+      "frame": 8,
+      "start": 35.587,
+      "end": 35.827,
+      "text": "and the",
+      "words": [
+        {
+          "id": "caption-word-15-0",
+          "text": "and",
+          "start": 35.587,
+          "end": 35.657
+        },
+        {
+          "id": "caption-word-15-1",
+          "text": "the",
+          "start": 35.657,
+          "end": 35.827
+        }
+      ]
+    },
+    {
+      "id": "caption-group-16",
+      "frame": 8,
+      "start": 35.827,
+      "end": 37.867,
+      "text": "teleprompter under your camera,",
+      "words": [
+        {
+          "id": "caption-word-16-0",
+          "text": "teleprompter",
+          "start": 35.827,
+          "end": 36.557
+        },
+        {
+          "id": "caption-word-16-1",
+          "text": "under",
+          "start": 36.557,
+          "end": 36.837
+        },
+        {
+          "id": "caption-word-16-2",
+          "text": "your",
+          "start": 36.907,
+          "end": 37.097
+        },
+        {
+          "id": "caption-word-16-3",
+          "text": "camera,",
+          "start": 37.097,
+          "end": 37.757
+        }
+      ]
+    },
+    {
+      "id": "caption-group-17",
+      "frame": 8,
+      "start": 37.867,
+      "end": 38.967,
+      "text": "your audience will",
+      "words": [
+        {
+          "id": "caption-word-17-0",
+          "text": "your",
+          "start": 37.867,
+          "end": 38.017
+        },
+        {
+          "id": "caption-word-17-1",
+          "text": "audience",
+          "start": 38.057,
+          "end": 38.667
+        },
+        {
+          "id": "caption-word-17-2",
+          "text": "will",
+          "start": 38.667,
+          "end": 38.967
+        }
+      ]
+    },
+    {
+      "id": "caption-group-18",
+      "frame": 8,
+      "start": 38.967,
+      "end": 40.057,
+      "text": "never see it,",
+      "words": [
+        {
+          "id": "caption-word-18-0",
+          "text": "never",
+          "start": 38.967,
+          "end": 39.347
+        },
+        {
+          "id": "caption-word-18-1",
+          "text": "see",
+          "start": 39.347,
+          "end": 39.557
+        },
+        {
+          "id": "caption-word-18-2",
+          "text": "it,",
+          "start": 39.557,
+          "end": 39.937
+        }
+      ]
+    },
+    {
+      "id": "caption-group-19",
+      "frame": 8,
+      "start": 40.117,
+      "end": 40.667,
+      "text": "yours and",
+      "words": [
+        {
+          "id": "caption-word-19-0",
+          "text": "yours",
+          "start": 40.117,
+          "end": 40.397
+        },
+        {
+          "id": "caption-word-19-1",
+          "text": "and",
+          "start": 40.397,
+          "end": 40.667
+        }
+      ]
+    },
+    {
+      "id": "caption-group-20",
+      "frame": 8,
+      "start": 40.667,
+      "end": 41.747,
+      "text": "only yours.",
+      "words": [
+        {
+          "id": "caption-word-20-0",
+          "text": "only",
+          "start": 40.667,
+          "end": 41.037
+        },
+        {
+          "id": "caption-word-20-1",
+          "text": "yours.",
+          "start": 41.037,
+          "end": 41.627
+        }
+      ]
+    },
+    {
+      "id": "caption-group-21",
+      "frame": 9,
+      "start": 41.845,
+      "end": 43.585,
+      "text": "Free open-source.",
+      "words": [
+        {
+          "id": "caption-word-21-0",
+          "text": "Free",
+          "start": 41.845,
+          "end": 42.085
+        },
+        {
+          "id": "caption-word-21-1",
+          "text": "open-source.",
+          "start": 42.185,
+          "end": 43.585
+        }
+      ]
+    },
+    {
+      "id": "caption-group-22",
+      "frame": 9,
+      "start": 43.585,
+      "end": 44.825,
+      "text": "Notch controls your",
+      "words": [
+        {
+          "id": "caption-word-22-0",
+          "text": "Notch",
+          "start": 43.585,
+          "end": 43.945
+        },
+        {
+          "id": "caption-word-22-1",
+          "text": "controls",
+          "start": 43.945,
+          "end": 44.485
+        },
+        {
+          "id": "caption-word-22-2",
+          "text": "your",
+          "start": 44.535,
+          "end": 44.825
+        }
+      ]
+    },
+    {
+      "id": "caption-group-23",
+      "frame": 9,
+      "start": 44.825,
+      "end": 45.805,
+      "text": "notch on duty.",
+      "words": [
+        {
+          "id": "caption-word-23-0",
+          "text": "notch",
+          "start": 44.825,
+          "end": 45.195
+        },
+        {
+          "id": "caption-word-23-1",
+          "text": "on",
+          "start": 45.195,
+          "end": 45.345
+        },
+        {
+          "id": "caption-word-23-2",
+          "text": "duty.",
+          "start": 45.345,
+          "end": 45.685
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,231 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Frame 1 — 2:47 PM (hook · kinetic-type-beats) -->
+  </head>
+  <body>
+    <template>
+      <style>
+        @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=Inter:wght@400;800;900&display=swap");
+        @font-face {
+          font-family: "SF Pro Display";
+          src:
+            local("SF Pro Display"),
+            local("SFProDisplay-Regular"),
+            local("SF Pro Display Black");
+          font-weight: 100 900;
+        }
+
+        #root {
+          position: absolute;
+          inset: 0;
+          container-type: size;
+          font-family: "SF Pro Display", "Inter", sans-serif;
+          overflow: hidden;
+        }
+
+        /* full-bleed ink-black ground — dedicated clip, never on #root */
+        .bg {
+          position: absolute;
+          inset: 0;
+          background: #000000;
+        }
+
+        .stage {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        /* content column, optically centered at ~0.42 x height, well above the
+           caption band (bottom 17%) */
+        .stack {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          margin-bottom: 12cqh;
+        }
+
+        .chip {
+          font-family: "IBM Plex Mono", monospace;
+          font-weight: 500;
+          font-size: 1.05cqw;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: #ff9f0a;
+          margin-bottom: 2.2cqw;
+          will-change: transform;
+        }
+
+        /* both kinetic lines share one centered slot (grid-stacked) */
+        .slot {
+          display: grid;
+          place-items: center;
+          min-height: 13cqw;
+        }
+        .slot > div {
+          grid-area: 1 / 1;
+          white-space: nowrap;
+          will-change: transform;
+        }
+
+        .time-line {
+          font-size: 12.5cqw;
+          font-weight: 900;
+          line-height: 0.9;
+          letter-spacing: -0.04em;
+          text-transform: lowercase;
+          color: rgba(255, 255, 255, 0.92);
+        }
+
+        .call-line {
+          font-size: 7.5cqw;
+          font-weight: 800;
+          line-height: 0.9;
+          letter-spacing: -0.03em;
+          text-transform: lowercase;
+          color: rgba(255, 255, 255, 0.92);
+        }
+
+        .rule-svg {
+          display: block;
+          margin-top: 2.4cqw;
+          width: 480px;
+          height: 2px;
+        }
+        .rule-svg line {
+          stroke: rgba(255, 255, 255, 0.22);
+          stroke-width: 1.5;
+          stroke-linecap: butt;
+        }
+
+        /* recreated camera-state pill (product UI — green permitted here) */
+        .cam-pill {
+          display: flex;
+          align-items: center;
+          gap: 0.7cqw;
+          margin-top: 2.2cqw;
+          padding: 0.7cqw 1.4cqw;
+          background: #1a1918;
+          border: 1px solid #282726;
+          border-radius: 999px;
+          transform-origin: 50% 50%;
+          will-change: transform;
+        }
+        .cam-dot {
+          width: 0.6cqw;
+          height: 0.6cqw;
+          border-radius: 50%;
+          background: #32d74b;
+        }
+        .cam-label {
+          font-family: "IBM Plex Mono", monospace;
+          font-weight: 500;
+          font-size: 0.95cqw;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.9);
+        }
+      </style>
+
+      <div
+        id="root"
+        data-composition-id="01-hook"
+        data-width="1920"
+        data-height="1080"
+        data-duration="3.849"
+      >
+        <div class="clip bg" data-start="0" data-duration="3.849" data-track-index="0"></div>
+
+        <div class="clip stage" data-start="0" data-duration="3.849" data-track-index="1">
+          <div class="stack">
+            <div class="chip" id="hook01-chip">local time</div>
+
+            <div class="slot">
+              <div class="time-line" id="hook01-time">2:47&#8202;pm</div>
+              <div class="call-line" id="hook01-call">you&rsquo;re on a call.</div>
+            </div>
+
+            <svg
+              class="rule-svg"
+              viewBox="0 0 480 2"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <line id="hook01-rule" x1="0" y1="1" x2="480" y2="1" />
+            </svg>
+
+            <div class="cam-pill" id="hook01-pill">
+              <span class="cam-dot"></span>
+              <span class="cam-label">camera on</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+      <script>
+        window.__timelines = window.__timelines || {};
+
+        // hairline rule: measured dash setup for the draw-on (svg-path-draw)
+        const rule = document.getElementById("hook01-rule");
+        const ruleLen = rule.getTotalLength();
+        rule.style.strokeDasharray = `${ruleLen}`;
+        rule.style.strokeDashoffset = `${ruleLen}`;
+
+        const tl = gsap.timeline({ paused: true });
+        const CUT = 0.04; // ~one frame — reads as a hard cut (discrete-text-sequence)
+
+        // ---- Scene 1 (0.00–1.07) — "2:47 PM." ----------------------------
+        // mono timestamp chip fades up first
+        tl.fromTo(
+          "#hook01-chip",
+          { opacity: 0, y: 10 },
+          { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" },
+          0.0,
+        );
+        // display line lands via hard cut, then settles on a long tail
+        tl.fromTo("#hook01-time", { opacity: 0 }, { opacity: 1, duration: CUT, ease: "none" }, 0.08);
+        tl.fromTo(
+          "#hook01-time",
+          { scale: 1.06 },
+          { scale: 1, duration: 1.0, ease: "power3.out" },
+          0.08,
+        );
+
+        // ---- Scene 2 (1.07–2.28) — "You're on a call." --------------------
+        // the swap IS the beat: timestamp + chip hard-cut away, call line hard-cuts in
+        tl.set("#hook01-chip", { opacity: 0 }, 1.07);
+        tl.set("#hook01-time", { opacity: 0 }, 1.07);
+        tl.fromTo("#hook01-call", { opacity: 0 }, { opacity: 1, duration: CUT, ease: "none" }, 1.07);
+        tl.fromTo(
+          "#hook01-call",
+          { scale: 1.05 },
+          { scale: 1, duration: 0.9, ease: "power3.out" },
+          1.07,
+        );
+        // thin hairline rule draws on beneath (svg-path-draw, left -> right)
+        tl.to(
+          "#hook01-rule",
+          { strokeDashoffset: 0, duration: 0.55, ease: "power2.out" },
+          1.22,
+        );
+
+        // ---- Scene 3 (2.28–3.349) — "Camera's on." ------------------------
+        // recreated camera-dot pill spring-pops in (smooth settle, no overshoot),
+        // then everything holds still for the cut — no exit (non-final frame)
+        tl.fromTo(
+          "#hook01-pill",
+          { scale: 0, opacity: 0, y: 14 },
+          { scale: 1, opacity: 1, y: 0, duration: 0.55, ease: "power3.out" },
+          2.28,
+        );
+
+        window.__timelines["01-hook"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

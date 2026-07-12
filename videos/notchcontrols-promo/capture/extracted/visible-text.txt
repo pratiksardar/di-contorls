@@ -1,0 +1,41 @@
+NotchControls — launch brief (no website; open-source GitHub project)
+
+PRODUCT
+NotchControls is a free, open-source macOS app that turns the MacBook notch into a
+cockpit for work sessions. Features: system-wide mic mute (mutes every app at once,
+one click at eye level, ⌥⇧M anywhere) · camera in-use indicator · teleprompter that is
+INVISIBLE in screen shares and recordings · notifications from coding agents (Claude
+Code, Codex — any CLI) the second one needs input or finishes, click a banner to land
+in the right window · live dashboard of every agent session on the machine (working /
+idle / needs-you, project names, one-click focus) · quiet hours + meeting-aware holds ·
+light/dark themes · MIT licensed. github.com/pratiksardar/di-contorls
+
+AUDIENCE
+Developers running multiple AI coding agents, and content creators who record or
+present on camera. Both live the same afternoon:
+
+THE RELATABLE STORY (the promo's spine)
+It's 2:47 PM. You're on a call. Your camera is on. Somewhere behind the meeting
+window, three coding agents are working — and one of them has been sitting on a
+permission prompt for twenty minutes. You don't know. You're also not sure you
+unmuted. And the script for your demo is on a sticky note below the camera, so your
+eyes keep dropping.
+
+Everything you're anxious about is invisible. And the one part of your screen you
+look at all day — the notch — does nothing.
+
+NotchControls puts the answers there. Mic state at eye level, one click to mute
+everything. A banner the moment an agent needs you — click it, you're in the right
+window. Every session, live: who's working, who's blocked, who's done. A teleprompter
+under the camera your audience can never see.
+
+MESSAGE (the one thing)
+Your notch tells you the second something needs you — and gives you back your mic,
+your script, and your flow.
+
+TONE
+Quiet confidence, dry humor about a real anxiety. Not shouty SaaS. Dark, native-macOS
+aesthetic: black island, orange = needs you, green = working, red = muted.
+
+CTA
+Free & open source. github.com/pratiksardar/di-contorls
