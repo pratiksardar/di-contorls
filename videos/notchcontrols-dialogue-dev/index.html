@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>notchcontrols — dev dialogue</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      /* ---- local fonts (deterministic render: no CDN fetch) ---- */
+      @font-face {
+        font-family: "Space Grotesk";
+        src: url("assets/fonts/SpaceGrotesk-500.woff2") format("woff2");
+        font-weight: 500;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Space Grotesk";
+        src: url("assets/fonts/SpaceGrotesk-700.woff2") format("woff2");
+        font-weight: 700;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "JetBrains Mono";
+        src: url("assets/fonts/JetBrainsMono-700.woff2") format("woff2");
+        font-weight: 700;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Inter";
+        src: url("assets/fonts/Inter-Regular.woff2") format("woff2");
+        font-weight: 400;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Inter";
+        src: url("assets/fonts/Inter-Bold.woff2") format("woff2");
+        font-weight: 700;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Inter";
+        src: url("assets/fonts/Inter-Black.woff2") format("woff2");
+        font-weight: 900;
+        font-display: block;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #101014;
+      }
+
+      /* ---- palette ---- */
+      :root {
+        --canvas: #101014;
+        --ink: #f2f2f5;
+        --card: #1c1c22;
+        --hairline: #2a2a33;
+        --lime: #c6f432; /* ARJUN accent */
+        --cyan: #7de2ff; /* NOVA accent */
+        --ok: #4ade80; /* session working */
+        --warn: #fb923c; /* session needs-you */
+        --dim: #55555f;
+      }
+
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        container-type: size;
+        font-family: "Space Grotesk", "Inter", sans-serif;
+        color: var(--ink);
+      }
+      /* full-bleed ground on a child, never on the root */
+      #bg {
+        position: absolute;
+        inset: 0;
+        background: var(--canvas);
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+        background-size: 96px 96px;
+      }
+
+      /* ---- chat stage ---- */
+      #g-stage {
+        position: absolute;
+        inset: 0;
+      }
+      .avatar {
+        position: absolute;
+        top: 540px;
+        width: 130px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        opacity: 0.6;
+      }
+      #av-arjun {
+        left: 96px;
+      }
+      #av-nova {
+        right: 96px;
+      }
+      .avatar .circle {
+        position: relative;
+        width: 84px;
+        height: 84px;
+        border-radius: 50%;
+        background: var(--card);
+        border: 2px solid var(--lime);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 34px;
+      }
+      #av-nova .circle {
+        border-color: var(--cyan);
+      }
+      .avatar .ring {
+        position: absolute;
+        inset: -10px;
+        border-radius: 50%;
+        border: 2px solid var(--lime);
+        opacity: 0;
+      }
+      #av-nova .ring {
+        border-color: var(--cyan);
+      }
+      .avatar .tag {
+        font-family: "JetBrains Mono", monospace;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 0.9cqw;
+        color: var(--ink);
+      }
+      .bars {
+        display: flex;
+        gap: 6px;
+        height: 26px;
+        align-items: flex-end;
+        opacity: 0;
+      }
+      .bars .bar {
+        display: block;
+        width: 6px;
+        height: 26px;
+        border-radius: 3px;
+        background: var(--lime);
+      }
+      #av-nova .bars .bar {
+        background: var(--cyan);
+      }
+
+      /* ---- dialogue bubbles ---- */
+      #b-col {
+        position: absolute;
+        left: 262px;
+        right: 262px;
+        top: 0;
+        bottom: 0;
+      }
+      .bubble {
+        position: absolute;
+        top: 552px;
+        max-width: 46cqw;
+        padding: 28px 38px;
+        background: var(--card);
+        border: 1px solid var(--hairline);
+        font-size: 2cqw;
+        font-weight: 500;
+        line-height: 1.35;
+        color: var(--ink);
+      }
+      .bubble.b-a {
+        left: 0;
+        border-radius: 6px 24px 24px 24px;
+        border-color: rgba(198, 244, 50, 0.28);
+      }
+      .bubble.b-n {
+        right: 0;
+        border-radius: 24px 6px 24px 24px;
+        border-color: rgba(125, 226, 255, 0.28);
+        text-align: right;
+      }
+      .bubble em {
+        font-style: normal;
+        font-weight: 700;
+      }
+      .bubble.b-a em {
+        color: var(--lime);
+      }
+      .bubble.b-n em {
+        color: var(--cyan);
+      }
+
+      /* ---- feature chips ---- */
+      .chip {
+        position: absolute;
+        top: 84px;
+        background: #17171d;
+        border: 1px solid var(--hairline);
+        border-radius: 14px;
+        padding: 22px 28px;
+        font-family: "JetBrains Mono", monospace;
+        font-weight: 700;
+        font-size: 0.9cqw;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      #c1-notify {
+        left: 780px;
+        width: 360px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+      }
+      #c1-pill {
+        width: 150px;
+        height: 36px;
+        border-radius: 18px;
+        background: #000;
+        border: 1px solid var(--hairline);
+        display: flex;
+        align-items: center;
+        padding-left: 16px;
+      }
+      #c1-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--lime);
+      }
+      #c1-banner {
+        background: var(--lime);
+        color: #101014;
+        border-radius: 8px;
+        padding: 8px 16px;
+      }
+      #c2-fleet {
+        left: 720px;
+        width: 480px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .s-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: #101016;
+        border: 1px solid var(--hairline);
+        border-radius: 8px;
+        padding: 10px 16px;
+        letter-spacing: 0.08em;
+      }
+      .s-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+      #c2-r1 .s-dot {
+        background: var(--ok);
+      }
+      #c2-r2 .s-dot {
+        background: var(--warn);
+      }
+      #c2-r3 .s-dot {
+        background: var(--dim);
+      }
+      #c2-r3 {
+        color: #8a8a96;
+      }
+      #c3-term {
+        left: 640px;
+        width: 640px;
+        text-transform: none;
+        letter-spacing: 0.04em;
+        font-size: 1.1cqw;
+        padding: 26px 32px;
+      }
+      #c3-cmd .p {
+        color: var(--lime);
+      }
+      #c3-cmd span {
+        white-space: pre;
+      }
+
+      /* ---- outro ---- */
+      #o-card {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .stack {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      #o-word {
+        font-size: 7cqw;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1;
+        color: var(--ink);
+        text-transform: lowercase;
+      }
+      #o-rule {
+        width: 44px;
+        height: 3px;
+        background: var(--lime);
+        margin: 2cqw 0;
+      }
+      #o-url {
+        font-family: "JetBrains Mono", monospace;
+        font-weight: 700;
+        font-size: 1.1cqw;
+        letter-spacing: 0.12em;
+        color: #9a9aa6;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="38.5"
+      data-fps="30"
+      data-width="1920"
+      data-height="1080"
+    >
+      <div id="bg"></div>
+
+      <!-- chat stage: avatars, live until the outro clears it -->
+      <div id="g-stage" class="clip" data-start="0" data-duration="35.5" data-track-index="1">
+        <div id="av-arjun" class="avatar">
+          <div id="aa-circle" class="circle" data-layout-allow-overflow>
+            <div id="aa-ring" class="ring"></div>
+            A
+          </div>
+          <div id="aa-bars" class="bars">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span
+            ><span class="bar"></span><span class="bar"></span>
+          </div>
+          <div id="aa-tag" class="tag">Arjun</div>
+        </div>
+        <div id="av-nova" class="avatar">
+          <div id="an-circle" class="circle" data-layout-allow-overflow>
+            <div id="an-ring" class="ring"></div>
+            N
+          </div>
+          <div id="an-bars" class="bars">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span
+            ><span class="bar"></span><span class="bar"></span>
+          </div>
+          <div id="an-tag" class="tag">Nova</div>
+        </div>
+      </div>
+
+      <!-- dialogue bubbles (tracks cycle 2/3/4 so overlapping exits never share a track) -->
+      <div id="b-col">
+        <div id="b1" class="clip bubble b-a" data-start="0.5" data-duration="9.03" data-track-index="2">
+          Okay, honestly — how many Claude sessions do you have running <em>right now</em>?
+        </div>
+        <div id="b2" class="clip bubble b-n" data-start="4.86" data-duration="10.1" data-track-index="3">
+          Eleven. And I just found out one of them has been <em>stuck for half an hour</em>.
+        </div>
+        <div id="b3" class="clip bubble b-a" data-start="9.18" data-duration="9.59" data-track-index="4">
+          That's why I put <em>NotchControls</em> on. The notch taps me <em>the second</em> an
+          agent needs input.
+        </div>
+        <div id="b4" class="clip bubble b-n" data-start="14.61" data-duration="9.82" data-track-index="2">
+          Wait. And clicking the banner drops you into the <em>right window</em>?
+        </div>
+        <div id="b5" class="clip bubble b-a" data-start="18.42" data-duration="9.35" data-track-index="3">
+          Right window, right project. Plus <em>the whole fleet, live</em>. Who's working, who's
+          blocked, who's done.
+        </div>
+        <div id="b6" class="clip bubble b-n" data-start="24.08" data-duration="8.18" data-track-index="4">
+          Okay, that's <em>actually sick</em>. What's the setup?
+        </div>
+        <div id="b7" class="clip bubble b-a" data-start="27.42" data-duration="6.6" data-track-index="2">
+          <em>One command.</em> Install hooks. It wires Claude Code and Codex for you.
+        </div>
+        <div id="b8" class="clip bubble b-n" data-start="31.91" data-duration="3.59" data-track-index="3">
+          And it's <em>free</em>?
+        </div>
+        <div id="b9" class="clip bubble b-a" data-start="33.67" data-duration="1.83" data-track-index="4">
+          <em>Free, and open source.</em>
+        </div>
+      </div>
+
+      <!-- feature chips (track 5, no overlap) -->
+      <div id="c1-notify" class="clip chip" data-start="11.5" data-duration="3.05" data-track-index="5">
+        <div id="c1-pill"><div id="c1-dot"></div></div>
+        <div id="c1-banner">needs your input</div>
+      </div>
+      <div id="c2-fleet" class="clip chip" data-start="20.5" data-duration="3.55" data-track-index="5">
+        <div id="c2-r1" class="s-row"><span class="s-dot"></span>api-refactor · working</div>
+        <div id="c2-r2" class="s-row"><span class="s-dot"></span>auth-flow · needs you</div>
+        <div id="c2-r3" class="s-row"><span class="s-dot"></span>db-migrate · done</div>
+      </div>
+      <div id="c3-term" class="clip chip" data-start="28.5" data-duration="3.35" data-track-index="5">
+        <div id="c3-cmd"><span class="p">$ </span></div>
+      </div>
+
+      <!-- outro card -->
+      <div id="o-card" class="clip" data-start="35.5" data-duration="3" data-track-index="6">
+        <div id="o-stack" class="stack">
+          <h1 id="o-word">notchcontrols</h1>
+          <div id="o-rule"></div>
+          <!-- URL is intentionally 'di-contorls' — verbatim, do not correct -->
+          <div id="o-url">github.com/pratiksardar/di-contorls</div>
+        </div>
+      </div>
+
+      <!-- ---- audio (framework-owned, direct root children) ---- -->
+      <audio id="v01" class="clip" src="assets/voice/01.wav" data-start="0.5" data-duration="4.01" data-track-index="10" data-volume="1"></audio>
+      <audio id="v02" class="clip" src="assets/voice/02.wav" data-start="4.86" data-duration="3.97" data-track-index="10" data-volume="1"></audio>
+      <audio id="v03" class="clip" src="assets/voice/03.wav" data-start="9.18" data-duration="5.08" data-track-index="10" data-volume="1"></audio>
+      <audio id="v04" class="clip" src="assets/voice/04.wav" data-start="14.61" data-duration="3.46" data-track-index="10" data-volume="1"></audio>
+      <audio id="v05" class="clip" src="assets/voice/05.wav" data-start="18.42" data-duration="5.31" data-track-index="10" data-volume="1"></audio>
+      <audio id="v06" class="clip" src="assets/voice/06.wav" data-start="24.08" data-duration="2.99" data-track-index="10" data-volume="1"></audio>
+      <audio id="v07" class="clip" src="assets/voice/07.wav" data-start="27.42" data-duration="4.14" data-track-index="10" data-volume="1"></audio>
+      <audio id="v08" class="clip" src="assets/voice/08.wav" data-start="31.91" data-duration="1.41" data-track-index="10" data-volume="1"></audio>
+      <audio id="v09" class="clip" src="assets/voice/09.wav" data-start="33.67" data-duration="1.41" data-track-index="10" data-volume="1"></audio>
+
+      <audio id="sp1" class="clip" src="assets/sfx/pop.mp3" data-start="0.5" data-duration="0.72" data-track-index="11" data-volume="0.3"></audio>
+      <audio id="sp2" class="clip" src="assets/sfx/pop.mp3" data-start="4.86" data-duration="0.72" data-track-index="11" data-volume="0.3"></audio>
+      <audio id="sp3" class="clip" src="assets/sfx/pop.mp3" data-start="9.18" data-duration="0.72" data-track-index="11" data-volume="0.3"></audio>
+      <audio id="sp4" class="clip" src="assets/sfx/pop.mp3" data-start="14.61" data-duration="0.72" data-track-index="11" data-volume="0.3"></audio>
+      <audio id="sp5" class="clip" src="assets/sfx/pop.mp3" data-start="18.42" data-duration="0.72" data-track-index="11" data-volume="0.3"></audio>
+      <audio id="sp6" class="clip" src="assets/sfx/pop.mp3" data-start="24.08" data-duration="0.72" data-track-index="11" data-volume="0.3"></audio>
+      <audio id="sp7" class="clip" src="assets/sfx/pop.mp3" data-start="27.42" data-duration="0.72" data-track-index="11" data-volume="0.3"></audio>
+      <audio id="sp8" class="clip" src="assets/sfx/pop.mp3" data-start="31.91" data-duration="0.72" data-track-index="11" data-volume="0.3"></audio>
+      <audio id="sp9" class="clip" src="assets/sfx/pop.mp3" data-start="33.67" data-duration="0.72" data-track-index="11" data-volume="0.3"></audio>
+
+      <audio id="sk1" class="clip" src="assets/sfx/click-soft.mp3" data-start="11.5" data-duration="0.37" data-track-index="12" data-volume="0.7"></audio>
+      <audio id="sk2" class="clip" src="assets/sfx/click-soft.mp3" data-start="20.5" data-duration="0.37" data-track-index="12" data-volume="0.7"></audio>
+      <audio id="sk3" class="clip" src="assets/sfx/click-soft.mp3" data-start="28.5" data-duration="0.37" data-track-index="12" data-volume="0.7"></audio>
+      <audio id="sc1" class="clip" src="assets/sfx/chime.mp3" data-start="33.67" data-duration="2.54" data-track-index="12" data-volume="0.5"></audio>
+      <audio id="sw1" class="clip" src="assets/sfx/whoosh.mp3" data-start="35.3" data-duration="0.57" data-track-index="13" data-volume="0.35"></audio>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const OUTRO = 35.5;
+      const SHIFT_Y = -220;
+      const FADE_D = 0.35;
+
+      /* dialogue map (authoritative timing table) */
+      const LINES = [
+        { id: "#b1", sp: "a", start: 0.5, dur: 4.01 },
+        { id: "#b2", sp: "n", start: 4.86, dur: 3.97 },
+        { id: "#b3", sp: "a", start: 9.18, dur: 5.08 },
+        { id: "#b4", sp: "n", start: 14.61, dur: 3.46 },
+        { id: "#b5", sp: "a", start: 18.42, dur: 5.31 },
+        { id: "#b6", sp: "n", start: 24.08, dur: 2.99 },
+        { id: "#b7", sp: "a", start: 27.42, dur: 4.14 },
+        { id: "#b8", sp: "n", start: 31.91, dur: 1.41 },
+        { id: "#b9", sp: "a", start: 33.67, dur: 1.41 },
+      ];
+
+      /* terminal chip: build char spans synchronously at init (deterministic) */
+      (function buildTerm() {
+        const host = document.getElementById("c3-cmd");
+        const text = "notchcontrols install-hooks";
+        for (const ch of text) {
+          const s = document.createElement("span");
+          s.className = "tc";
+          s.textContent = ch;
+          host.appendChild(s);
+        }
+      })();
+
+      /* ---------- per-line choreography ---------- */
+      LINES.forEach((L, i) => {
+        const isA = L.sp === "a";
+        const next = LINES[i + 1];
+        const after = LINES[i + 2];
+
+        /* bubble entrance: spring in with a smooth power3 settle (no bounce/back/elastic) */
+        tl.fromTo(
+          L.id,
+          { y: 60, scale: 0.85, autoAlpha: 0, transformOrigin: isA ? "0% 100%" : "100% 100%" },
+          { y: 0, scale: 1, autoAlpha: 1, duration: 0.5, ease: "power3.out" },
+          L.start
+        );
+
+        /* previous bubble shifts up, shrinks and dims when the next line lands */
+        if (next) {
+          tl.to(
+            L.id,
+            { y: SHIFT_Y, scale: 0.94, autoAlpha: 0.55, duration: 0.45, ease: "power2.inOut" },
+            next.start
+          );
+        }
+        /* fade out when line i+2 arrives (max 2 visible); exit ends exactly at clip boundary */
+        if (after) {
+          tl.to(
+            L.id,
+            { y: SHIFT_Y - 70, autoAlpha: 0, duration: FADE_D, ease: "power2.in" },
+            after.start
+          );
+          tl.set(L.id, { autoAlpha: 0 }, after.start + FADE_D);
+        } else {
+          /* last two bubbles clear under the outro whoosh */
+          tl.to(
+            L.id,
+            { autoAlpha: 0, y: (next ? SHIFT_Y : 0) - 50, duration: 0.4, ease: "power2.in" },
+            35.1
+          );
+          tl.set(L.id, { autoAlpha: 0 }, OUTRO);
+        }
+
+        /* active-speaker focus: inactive avatar dims to 60% */
+        tl.to("#av-arjun", { autoAlpha: isA ? 1 : 0.6, duration: 0.3, ease: "power2.out" }, L.start);
+        tl.to("#av-nova", { autoAlpha: isA ? 0.6 : 1, duration: 0.3, ease: "power2.out" }, L.start);
+
+        /* pulse ring on the active avatar: finite repeats sized to the line duration */
+        tl.fromTo(
+          isA ? "#aa-ring" : "#an-ring",
+          { scale: 1, autoAlpha: 0.5 },
+          {
+            scale: 1.5,
+            autoAlpha: 0,
+            duration: 0.9,
+            ease: "power1.out",
+            repeat: Math.max(0, Math.floor(L.dur / 0.9) - 1),
+          },
+          L.start
+        );
+
+        /* 5-bar waveform: heights are a pure function of bar index + step (finite keyframes) */
+        const barsSel = isA ? "#aa-bars" : "#an-bars";
+        tl.to(barsSel, { autoAlpha: 1, duration: 0.15, ease: "power2.out" }, L.start);
+        tl.to(barsSel, { autoAlpha: 0, duration: 0.2, ease: "power2.in" }, L.start + L.dur - 0.2);
+        const steps = Math.max(1, Math.floor(L.dur / 0.18));
+        document.querySelectorAll(barsSel + " .bar").forEach((bar, j) => {
+          const kf = [];
+          for (let k = 0; k < steps; k++) {
+            kf.push({
+              scaleY: 0.25 + 0.7 * Math.abs(Math.sin(1.7 * j + 2.3 * k)),
+              duration: 0.18,
+            });
+          }
+          tl.to(bar, { keyframes: kf, ease: "none", transformOrigin: "50% 100%" }, L.start);
+        });
+      });
+
+      /* ---------- feature chips ---------- */
+      /* chip 1 · notify (11.5): island pill, then the lime banner pops */
+      tl.fromTo(
+        "#c1-notify",
+        { y: -30, scale: 0.9, autoAlpha: 0, transformOrigin: "50% 0%" },
+        { y: 0, scale: 1, autoAlpha: 1, duration: 0.4, ease: "power3.out" },
+        11.5
+      );
+      tl.fromTo(
+        "#c1-banner",
+        { scale: 0.7, autoAlpha: 0 },
+        { scale: 1, autoAlpha: 1, duration: 0.35, ease: "power3.out" },
+        11.75
+      );
+      tl.to("#c1-notify", { autoAlpha: 0, y: -24, duration: 0.35, ease: "power2.in" }, 14.2);
+      tl.set("#c1-notify", { autoAlpha: 0 }, 14.55);
+
+      /* chip 2 · fleet (20.5): three session rows tick in */
+      tl.fromTo(
+        "#c2-fleet",
+        { y: -30, autoAlpha: 0 },
+        { y: 0, autoAlpha: 1, duration: 0.4, ease: "power3.out" },
+        20.5
+      );
+      tl.fromTo("#c2-r1", { x: -16, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 0.35, ease: "power2.out" }, 20.6);
+      tl.fromTo("#c2-r2", { x: -16, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 0.35, ease: "power2.out" }, 21.4);
+      tl.fromTo("#c2-r3", { x: -16, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 0.35, ease: "power2.out" }, 22.2);
+      tl.to("#c2-fleet", { autoAlpha: 0, y: -24, duration: 0.35, ease: "power2.in" }, 23.7);
+      tl.set("#c2-fleet", { autoAlpha: 0 }, 24.05);
+
+      /* chip 3 · terminal (28.5): the command types on char-by-char */
+      tl.fromTo(
+        "#c3-term",
+        { y: -30, autoAlpha: 0 },
+        { y: 0, autoAlpha: 1, duration: 0.4, ease: "power3.out" },
+        28.5
+      );
+      tl.fromTo(
+        "#c3-cmd .tc",
+        { autoAlpha: 0 },
+        { autoAlpha: 1, duration: 0.02, ease: "none", stagger: 0.045 },
+        28.7
+      );
+      tl.to("#c3-term", { autoAlpha: 0, y: -24, duration: 0.35, ease: "power2.in" }, 31.5);
+      tl.set("#c3-term", { autoAlpha: 0 }, 31.85);
+
+      /* ---------- outro (35.5): conversation clears, card holds to 38.5 ---------- */
+      tl.to("#g-stage", { autoAlpha: 0, duration: 0.4, ease: "power2.in" }, 35.1);
+      tl.set("#g-stage", { autoAlpha: 0 }, OUTRO);
+
+      tl.fromTo(
+        "#o-word",
+        { y: 70, autoAlpha: 0 },
+        { y: 0, autoAlpha: 1, duration: 0.5, ease: "power4.out" },
+        OUTRO
+      );
+      tl.fromTo(
+        "#o-rule",
+        { scaleX: 0, transformOrigin: "left center" },
+        { scaleX: 1, duration: 0.45, ease: "expo.out" },
+        35.75
+      );
+      tl.fromTo(
+        "#o-url",
+        { autoAlpha: 0, y: 18 },
+        { autoAlpha: 1, y: 0, duration: 0.4, ease: "power2.out" },
+        35.95
+      );
+      /* holds still to 38.5 */
+
+      tl.seek(0);
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
