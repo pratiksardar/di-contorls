@@ -1,0 +1,124 @@
+{
+  "category": "kinetic-type",
+  "duration_s": 15.0,
+  "fps": 30,
+  "canvas": { "w": 1920, "h": 1080, "aspect": "16:9" },
+  "style": "Broadside dark register (see /Users/lemon/code/controls/videos/notchcontrols-promo/frame.md — normative). Ink-black canvas, single fire-orange accent, massive lowercase Inter 900 negative-tracked as graphic primitive, mono uppercase chrome (0.14em), 1px hairlines, flat plane: no shadows, no gradients, 0 radius EXCEPT the notch/island shapes in scene s4 (radius is the recreated hardware object's geometry, not a surface style). Smooth power3/power4/expo settles only — NO bouncy/back/elastic eases. Energy comes from SFX-locked beat slams, not springiness.",
+  "palette": ["#000000", "#1A1918", "#FF9F0A", "#FFFFFF", "#504D48", "#282726"],
+  "font": "Inter (weights 900/700/500/400 from local woff2 — see fonts note); mono chrome falls back to 'IBM Plex Mono', 'SF Mono', Menlo, monospace (no Plex file is shipped; system mono is acceptable for the chrome roles)",
+  "fonts_note": "Builder: copy the needed files from /Users/lemon/code/controls/videos/notchcontrols-promo/assets/fonts/ (Inter-Black.woff2 = 900 display, Inter-Bold.woff2 = 700, Inter-Medium.woff2 = 500, Inter-Regular.woff2 = 400) into PROJECT_DIR/assets/fonts/ and @font-face them. Display type is ALWAYS lowercase Inter 900, tracking -0.03em to -0.04em.",
+  "beats": [0.0, 1.7, 3.4, 5.1, 5.7, 6.4, 10.4, 11.4, 13.0, 13.6],
+  "export": "mp4",
+
+  "asset_needs": [],
+
+  "block": "caption-kinetic-slam",
+  "customize": {
+    "usage": "caption-kinetic-slam is the base for the three beat-slam lines (s1–s3) and the wordmark slam (s5): strip its palette/font to the frame.md system (ink-black ground, cream text, fire-orange emphasis word, Inter 900 lowercase), replace any bouncy ease it ships with power4.out + 3-frame shake-on-land, and retime word groups to the beat grid below. The island sting (s4) and the riser camera-push are hand-authored gaps — no caption block covers a shape recreation.",
+    "palette": { "bg": "#000000", "text": "#FFFFFF", "emphasis": "#FF9F0A" },
+    "font": "Inter 900 lowercase, tracking -0.03em",
+    "eases": "power4.out entrances, power2.in exits, expo.out settles — remove any back/elastic/bounce"
+  },
+
+  "shot_brief": "Fifteen seconds of percussion. Three pain-point lines slam onto black in strict 1.7s cadence — each landing on a bass impact, each with one word inked fire-orange — building a drum-line rhythm. On the fourth beat the type cuts away to a pure-shape recreation of the MacBook notch: a black strip descends, an island pill pops out beneath it with a single orange dot, and a riser starts pulling the whole assembly toward camera, accelerating until it swallows the frame — and at the exact riser peak the 'notchcontrols' wordmark slams down with the voice stinger speaking the name. Tagline lands as the voice says it, then a quiet mono outro card resolves: free & open source, the GitHub URL on a hairline. One dominant motif: type slammed onto the beat; the island sting is the single pattern-interrupt.",
+
+  "content": {
+    "scenes": [
+      {
+        "id": "s1-hook",
+        "start": 0.0,
+        "end": 1.7,
+        "text": "your agents are waiting.",
+        "emphasis_words": ["waiting"],
+        "emotion": "urgent, accusatory",
+        "motion": "slam (from y:-300, power4.out, land at 0.00 with 3-frame shake ≤8px) synced to impact-bass-1; 'waiting' gets color_shift to #FF9F0A + scale_pulse (1.0→1.10→1.0, sine.inOut) at 0.55; hold readable ≥1.0s; exit slide_out (y:-80, power2.in) over the last 0.15s",
+        "layout": "Statement treatment (frame.md #2): Inter h1 ~7.5cqw, 900, lowercase, left-anchored at pad-x 5.5cqw, vertically centered; chrome suppressed; ~55% silence",
+        "beats": [0.0, 0.55]
+      },
+      {
+        "id": "s2-build",
+        "start": 1.7,
+        "end": 3.4,
+        "text": "you might be muted.",
+        "emphasis_words": ["muted"],
+        "emotion": "anxious, needling",
+        "motion": "slam (from y:+300 this time — alternate slam direction per line for rhythm without changing the motif) on impact-bass-2 at 1.70; 'muted' color_shift to #FF9F0A + a single 2-frame opacity flicker (1→0.3→1) at 2.25 — a mic cutting out; exit slide_out over last 0.15s",
+        "layout": "Same Statement grid as s1 but right-anchored (mirror the anchor each slam so the cadence ping-pongs); h1 scale",
+        "beats": [1.7, 2.25]
+      },
+      {
+        "id": "s3-build",
+        "start": 3.4,
+        "end": 5.1,
+        "text": "your script is showing.",
+        "emphasis_words": ["showing"],
+        "emotion": "exposed, glitchy",
+        "motion": "slam (from y:-300, power4.out) on impact-bass-1 at 3.40; 'showing' color_shift to #FF9F0A, then at 4.10 (glitch-1 sfx) the whole line does a 6-frame RGB-split/ x-jitter shake (±6px, ease none) — the teleprompter caught on camera; exit is a hard cut under the whoosh at 5.10 (no fade — the glitch cuts to black)",
+        "layout": "Statement grid, left-anchored again; h1 scale",
+        "beats": [3.4, 4.1]
+      },
+      {
+        "id": "s4-island-sting",
+        "start": 5.1,
+        "end": 10.4,
+        "text": "",
+        "emphasis_words": [],
+        "emotion": "held breath → mounting pressure",
+        "motion": "HAND-AUTHORED (catalog gap — pure shape recreation, no text). 5.10 on whoosh: a menu-bar strip (#1A1918, full-width, ~64px tall at native scale, hairline #282726 bottom edge) slides down from the top edge (slide_top, power4.out, 0.4s); the notch — a #000000 rounded-bottom trapezoid pill ~360px wide — is cut into its center, outlined by the same 1px hairline. 5.70 on pop: an island pill (#000000, fully rounded, hairline #282726 border, ~300×72px) scale_grows out from beneath the notch (transformOrigin top center, scale 0→1, power3.out, 0.35s — NOT back.out). 6.40 on click + riser start: a single 14px #FF9F0A dot fade_in at the pill's left inside edge — the only color in the frame. 6.40→10.40 under the riser: hold_breath escalating into a camera push — the whole notch+island assembly scales from 1.0 to ~7 with power2.in (slow start, accelerating), drifting so the black island pill grows to swallow the frame; the orange dot blooms softly (scale 1→2, opacity →0) in the last 0.5s; by 10.38 the frame is pure #000000, primed for the wordmark slam. Legibility rule honored: the pill composition sits still and readable 6.75→8.5 before the push takes over.",
+        "layout": "Assembly centered horizontally, menu-bar strip flush to top edge; everything else empty black — maximum silence before the reveal. Radius allowed here only (hardware shape).",
+        "beats": [5.1, 5.7, 6.4, 10.4]
+      },
+      {
+        "id": "s5-reveal",
+        "start": 10.4,
+        "end": 13.0,
+        "text": "notchcontrols",
+        "emphasis_words": ["notchcontrols"],
+        "emotion": "triumphant, definitive",
+        "motion": "wordmark slam at 10.40 — from y:-300 scale:1.15, power4.out, 0.35s, 3-frame shake on land ≤10px — locked to impact-bass-2 AND the voice stinger's first word ('NotchControls'); a 36×2px #FF9F0A rule stub underline_sweep (fromTo scaleX 0→1, transformOrigin left, expo.out) beneath it at 10.80; tagline 'your notch, on duty' word_reveal (per-word from opacity:0 y:24, stagger 0.09, power3.out) at 11.40 exactly as the voice says the phrase, with chime; 'on duty' words in #FF9F0A; wordmark hold_breath (scale→1.015, sine.inOut) 11.4→12.85; exit fade_out 0.15s into s6",
+        "layout": "Declarative frame, chrome suppressed: 'notchcontrols' as the ONE display moment — Inter display ~11cqw (13 words→11cqw keeps the single word ≤78cqw), 900, lowercase, tracking -0.04em, cream #FFFFFF, centered; orange rule stub under it; tagline in Inter 600 ~2.6cqw lowercase, cream with 'on duty' orange, 2cqw below the rule",
+        "beats": [10.4, 10.8, 11.4]
+      },
+      {
+        "id": "s6-outro",
+        "start": 13.0,
+        "end": 15.0,
+        "text": "free & open source",
+        "emphasis_words": ["free"],
+        "emotion": "calm resolve",
+        "motion": "headline slide_bottom (from y:+120 opacity:0, power4.out, 0.4s) at 13.00 — soft landing, no shake, the percussion is over; at 13.60 on click-soft a 1px #282726 hairline bar_wipe (scaleX 0→1, expo.out) draws across, and the URL fade_in beneath it; everything holds still to 15.00 (no exit — end on the URL, last frame readable ≥1.3s)",
+        "layout": "Centered stack: 'free & open source' in Inter h2 ~4.5cqw 700 lowercase, cream, 'free' in #FF9F0A; hairline 36cqw wide; URL 'github.com/pratiksardar/di-contorls' (EXACT string, do not correct) in mono chrome ~1.5cqw, tracking 0.14em, #504D48 — mono stays as-is/lowercase since it is a URL, not a label",
+        "beats": [13.0, 13.6]
+      }
+    ]
+  },
+
+  "audio": {
+    "mount_note": "Mount ALL audio at the composition ROOT (index.html), each as its own <audio> clip with class='clip', data-start/data-duration/data-track-index — never inside sub-compositions. Files verified on disk; durations probed with afinfo.",
+    "tracks": [
+      { "role": "voice-stinger",  "file": "assets/voice/stinger.wav",     "start": 10.40, "duration": 2.86, "track": 10, "note": "'NotchControls. Your notch, on duty.' — first word lands with the wordmark slam; 'your notch, on duty' ≈ 11.4→13.26, tagline text syncs to it" },
+      { "role": "slam-1",         "file": "assets/sfx/impact-bass-1.mp3", "start": 0.00,  "duration": 2.12, "track": 11 },
+      { "role": "slam-3",         "file": "assets/sfx/impact-bass-1.mp3", "start": 3.40,  "duration": 2.12, "track": 11 },
+      { "role": "slam-wordmark",  "file": "assets/sfx/impact-bass-2.mp3", "start": 10.40, "duration": 2.59, "track": 11 },
+      { "role": "slam-2",         "file": "assets/sfx/impact-bass-2.mp3", "start": 1.70,  "duration": 2.59, "track": 12 },
+      { "role": "pop-island",     "file": "assets/sfx/pop.mp3",           "start": 5.70,  "duration": 0.72, "track": 12 },
+      { "role": "chime-tagline",  "file": "assets/sfx/chime.mp3",         "start": 11.40, "duration": 2.54, "track": 12, "note": "payoff under the tagline; keep gain below the voice" },
+      { "role": "glitch-script",  "file": "assets/sfx/glitch-1.mp3",      "start": 4.10,  "duration": 1.00, "track": 13, "note": "file is 2.64s — clip to 1.0s via data-duration, fade the last 0.2s" },
+      { "role": "click-dot",      "file": "assets/sfx/click.mp3",         "start": 6.40,  "duration": 0.37, "track": 13 },
+      { "role": "click-outro",    "file": "assets/sfx/click-soft.mp3",    "start": 13.60, "duration": 0.37, "track": 13 },
+      { "role": "whoosh-in",      "file": "assets/sfx/whoosh.mp3",        "start": 5.00,  "duration": 0.57, "track": 14, "note": "anticipates the 5.10 cut by 0.1s for perceived sync" },
+      { "role": "riser",          "file": "assets/sfx/riser.mp3",         "start": 6.40,  "duration": 4.00, "track": 14, "trim_from_s": 6.03, "note": "file is 10.03s with peak at its END — play only the final 4.0s (source offset 6.03s) so the peak lands EXACTLY at 10.40, the wordmark slam. Builder: pre-trim with ffmpeg (`ffmpeg -ss 6.03 -i assets/sfx/riser.mp3 -c copy assets/sfx/riser-tail.mp3`) rather than relying on runtime media-fragment offsets — deterministic renders need a file that starts where the clip starts." },
+      { "role": "whoosh-out",     "file": "assets/sfx/whoosh.mp3",        "start": 12.90, "duration": 0.57, "track": 14, "note": "low gain (~-10dB vs whoosh-in) — soft transition into the outro card under the voice tail" }
+    ]
+  },
+
+  "builder_notes": [
+    "Beat-lock is the whole piece: every entrance lands ON its sfx start (audio anticipation is already baked into whoosh-in only). Scenes partition [0,15] exactly — no gaps, no overlaps.",
+    "NO back/elastic/bounce eases anywhere, including inside caption-kinetic-slam if it ships one — replace with power4.out + a hand-keyed 3-frame shake for slams.",
+    "One register per frame (dark, always): #000000 ground, #FFFFFF text, #FF9F0A the ONLY accent. Never two orange elements competing in one frame.",
+    "Zero radius everywhere except the s4 notch/island hardware shapes; no shadows, no gradients; 1px hairlines are #282726.",
+    "The URL string 'github.com/pratiksardar/di-contorls' is intentional — render verbatim, do not spell-correct.",
+    "Copy Inter woff2 files from notchcontrols-promo/assets/fonts/ into assets/fonts/ and @font-face; no Google Fonts fetch (deterministic render).",
+    "Voice stinger is the loudness ceiling in 10.4–13.26 — duck chime/whoosh-out under it."
+  ]
+}
