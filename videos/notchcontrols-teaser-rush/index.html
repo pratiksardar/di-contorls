@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>NotchControls — RUSH teaser</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      /* local fonts — deterministic render, no CDN fetch */
+      @font-face {
+        font-family: "Anton";
+        src: url("assets/fonts/Anton-400.woff2") format("woff2");
+        font-weight: 400;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Space Mono";
+        src: url("assets/fonts/SpaceMono-700.woff2") format("woff2");
+        font-weight: 700;
+        font-display: block;
+      }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px; height: 1080px;
+        overflow: hidden;
+        background: #fffbf5;
+      }
+
+      :root {
+        --peach: #ffddc9;
+        --butter: #fff3c4;
+        --sky: #cde9ff;
+        --coral: #ff8a6b;
+        --coral-deep: #d7573a;
+        --cream: #fffbf5;
+        --ink: #4a2c1d;         /* warm dark-brown ink — NOT black */
+        --notch-black: #111111; /* the ONLY black: the notch island */
+        --mute-red: #ff3b30;
+        --agent-green: #2ecc71;
+      }
+
+      #stage {
+        position: relative;
+        width: 1920px; height: 1080px;
+        overflow: hidden;
+        background: var(--cream);
+        font-family: "Anton", sans-serif;
+        color: var(--ink);
+      }
+
+      /* ---------- scene shells ---------- */
+      .scene {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 100px 120px;
+        overflow: hidden;
+      }
+      .display {
+        font-family: "Anton", sans-serif;
+        font-weight: 400;
+        line-height: 0.92;
+        letter-spacing: 0.01em;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+      .micro {
+        font-family: "Space Mono", monospace;
+        font-weight: 700;
+        font-size: 30px;
+        letter-spacing: 0.32em;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+
+      /* ---------- notch island (the one black element) ---------- */
+      .notch {
+        position: absolute;
+        top: 0; left: 50%;
+        transform: translateX(-50%);
+        width: 380px; height: 72px;
+        background: var(--notch-black);
+        border-radius: 0 0 30px 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 22px;
+        z-index: 40;
+      }
+      .notch .dot {
+        width: 18px; height: 18px;
+        border-radius: 50%;
+      }
+      .dot--mic   { background: var(--mute-red); }
+      .dot--green { background: var(--agent-green); }
+      .notch .glyph {
+        font-family: "Space Mono", monospace;
+        font-weight: 700;
+        font-size: 22px;
+        color: #f5f0e8;
+        letter-spacing: 0.1em;
+      }
+
+      /* ---------- s1: ALT-TAB? ---------- */
+      #s1 { background: var(--peach); }
+      #s1 .display { font-size: 330px; }
+      #s1 .micro { margin-top: 36px; color: var(--coral-deep); }
+      .speedline {
+        position: absolute;
+        height: 22px;
+        border-radius: 11px;
+        transform: skewX(-30deg);
+        z-index: 5;
+      }
+
+      /* ---------- s2: NEVER AGAIN ---------- */
+      #s2 { background: var(--butter); }
+      #s2 .display { font-size: 290px; text-align: center; }
+      #s2 .never  { color: var(--coral-deep); }
+      .squiggle-wrap { width: 900px; margin-top: 14px; }
+      .squiggle-wrap svg { width: 100%; height: 60px; display: block; overflow: visible; }
+      .squiggle-wrap path {
+        fill: none;
+        stroke: var(--coral);
+        stroke-width: 14;
+        stroke-linecap: round;
+      }
+
+      /* ---------- s3 flash cards ---------- */
+      .flash .display { font-size: 210px; text-align: center; }
+      .flash .micro { margin-top: 44px; }
+      #s3a { background: #ffd0bd; }
+      #s3a .muted { color: #e8362c; }
+      #s3a .cross { color: #e8362c; }
+      #s3b { background: var(--sky); }
+      #s3b .kicker { font-size: 90px; letter-spacing: 0.06em; opacity: 0.75; }
+      #s3b .invisible-word { font-size: 250px; color: #2e6ea6; }
+      #s3c { background: var(--butter); }
+      #s3c .big3 { font-size: 430px; color: var(--coral-deep); line-height: 0.9; }
+      #s3c .agents-line { font-size: 125px; margin-top: -6px; }
+
+      /* ---------- s4: marquee + ONE GLANCE ---------- */
+      #s4 { background: var(--peach); }
+      .marquees {
+        position: absolute;
+        inset: -200px -400px;
+        transform: rotate(-6deg);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 70px;
+        z-index: 1;
+      }
+      .marquee { white-space: nowrap; overflow: visible; }
+      .marquee .strip {
+        display: inline-block;
+        font-family: "Anton", sans-serif;
+        font-size: 150px;
+        line-height: 1;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+      }
+      .strip--solid   { color: #ffb894; }
+      .strip--outline {
+        color: #fff1e6; /* faint fill so glyphs paint; stroke carries the look */
+        -webkit-text-stroke: 3px var(--coral-deep);
+      }
+      .strip--sky { color: #8ec6f2; }
+      #glance {
+        position: relative;
+        z-index: 10;
+        font-size: 280px;
+        background: var(--cream);
+        padding: 24px 70px 8px;
+        box-shadow: 0 30px 80px rgba(240, 101, 67, 0.25);
+        border-radius: 24px;
+      }
+      #glance .one { color: var(--coral-deep); }
+
+      /* ---------- s5: end card ---------- */
+      #s5 { background: var(--cream); }
+      #brand { font-size: 190px; letter-spacing: 0.02em; position: relative; z-index: 5; }
+      #tagline {
+        font-family: "Space Mono", monospace;
+        font-weight: 700;
+        font-size: 44px;
+        letter-spacing: 0.14em;
+        margin-top: 40px;
+        color: var(--ink);
+        position: relative; z-index: 5;
+      }
+      #tagline .w { display: inline-block; margin: 0 8px; }
+      #github-pill {
+        margin-top: 64px;
+        font-family: "Space Mono", monospace;
+        font-weight: 700;
+        font-size: 36px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--cream);
+        background: var(--coral-deep);
+        padding: 26px 60px;
+        border-radius: 999px;
+        position: relative; z-index: 5;
+      }
+      .endcard-accent {
+        position: absolute;
+        border-radius: 999px;
+        z-index: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="stage"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="9"
+      data-fps="30"
+      data-width="1920"
+      data-height="1080"
+    >
+      <div id="main" class="clip" data-start="0" data-duration="9" data-track-index="1" style="position:absolute; inset:0;">
+
+        <!-- S1 · 0.0–1.2 · ALT-TAB? -->
+        <section id="s1" class="scene">
+          <div class="speedline" id="sl1" style="top:180px; left:-700px; width:600px; background:#ffb894;"></div>
+          <div class="speedline" id="sl2" style="top:520px; left:-900px; width:820px; background:var(--coral);"></div>
+          <div class="speedline" id="sl3" style="top:840px; left:-650px; width:500px; background:var(--butter);"></div>
+          <h1 class="display" id="alttab">ALT&#8209;TAB?</h1>
+          <div class="micro" id="oldway">// the old way</div>
+        </section>
+
+        <!-- S2 · 1.2–2.4 · NEVER AGAIN -->
+        <section id="s2" class="scene">
+          <div class="notch" id="notch-whip" style="left:0; transform:none;">
+            <span class="dot dot--mic"></span>
+            <span class="glyph">&bull;&nbsp;&bull;&nbsp;&bull;</span>
+          </div>
+          <h1 class="display" id="never-line"><span class="never">NEVER</span> AGAIN</h1>
+          <div class="squiggle-wrap">
+            <svg viewBox="0 0 900 60" aria-hidden="true">
+              <path id="squiggle" pathLength="1"
+                d="M10 30 Q 66 -10 122 30 T 234 30 T 346 30 T 458 30 T 570 30 T 682 30 T 794 30 T 906 30" />
+            </svg>
+          </div>
+        </section>
+
+        <!-- S3a · 2.4–3.2 · MIC ✕ MUTED -->
+        <section id="s3a" class="scene flash">
+          <div class="notch">
+            <span class="dot dot--mic" id="mutedot"></span>
+            <span class="glyph">MIC OFF</span>
+          </div>
+          <h1 class="display"><span class="w3a" style="display:inline-block">MIC</span> <span class="w3a cross" style="display:inline-block">&#10005;</span> <span class="w3a muted" style="display:inline-block">MUTED</span></h1>
+          <div class="micro w3a-label">system&#8209;wide &middot; one key</div>
+        </section>
+
+        <!-- S3b · 3.2–4.0 · PROMPTER: INVISIBLE -->
+        <section id="s3b" class="scene flash">
+          <div class="notch">
+            <span class="glyph">PROMPTER</span>
+          </div>
+          <div class="display kicker" id="prompter-kicker">PROMPTER:</div>
+          <h1 class="display invisible-word" id="invisible-word">INVISIBLE</h1>
+          <div class="micro" id="s3b-label">not on your recording</div>
+        </section>
+
+        <!-- S3c · 4.0–4.8 · 3 AGENTS RUNNING -->
+        <section id="s3c" class="scene flash">
+          <div class="notch">
+            <span class="dot dot--green agent-dot"></span>
+            <span class="dot dot--green agent-dot"></span>
+            <span class="dot dot--green agent-dot"></span>
+          </div>
+          <h1 class="display big3" id="big3">3</h1>
+          <div class="display agents-line" id="agents-line">AGENTS RUNNING</div>
+          <div class="micro" id="s3c-label">claude &middot; codex &middot; live</div>
+        </section>
+
+        <!-- S4 · 4.8–6.2 · marquee rush + ONE GLANCE. -->
+        <section id="s4" class="scene">
+          <div class="marquees" data-layout-allow-overflow="true">
+            <div class="marquee"><span class="strip strip--outline" id="row1">MUTE &#10022; PROMPT &#10022; AGENTS &#10022; GLANCE &#10022; MUTE &#10022; PROMPT &#10022; AGENTS &#10022; GLANCE &#10022; MUTE &#10022; PROMPT &#10022; AGENTS &#10022;</span></div>
+            <div class="marquee"><span class="strip strip--solid" id="row2">NO ALT&#8209;TAB &#10022; NO ALT&#8209;TAB &#10022; NO ALT&#8209;TAB &#10022; NO ALT&#8209;TAB &#10022; NO ALT&#8209;TAB &#10022; NO ALT&#8209;TAB &#10022;</span></div>
+            <div class="marquee"><span class="strip strip--sky" id="row3">GLANCE &#10022; GLANCE &#10022; GLANCE &#10022; GLANCE &#10022; GLANCE &#10022; GLANCE &#10022; GLANCE &#10022; GLANCE &#10022; GLANCE &#10022;</span></div>
+          </div>
+          <h1 class="display" id="glance"><span class="one">ONE</span> GLANCE.</h1>
+        </section>
+
+        <!-- S5 · 6.2–9.0 · end card -->
+        <section id="s5" class="scene">
+          <div class="endcard-accent" id="acc1" data-layout-allow-overflow="true" style="width:420px;height:420px;background:var(--peach);top:-140px;left:-140px;"></div>
+          <div class="endcard-accent" id="acc2" data-layout-allow-overflow="true" style="width:340px;height:340px;background:var(--sky);bottom:-120px;right:-100px;"></div>
+          <div class="endcard-accent" id="acc3" style="width:200px;height:200px;background:var(--butter);bottom:120px;left:160px;"></div>
+          <div class="notch" id="notch-final">
+            <span class="dot dot--mic" id="final-mic"></span>
+            <span class="dot dot--green final-agent"></span>
+            <span class="dot dot--green final-agent"></span>
+            <span class="dot dot--green final-agent"></span>
+          </div>
+          <h1 class="display" id="brand">NotchControls</h1>
+          <div id="tagline">
+            <span class="w">Stop</span><span class="w">alt-tabbing.</span><span class="w">Start</span><span class="w">glancing.</span>
+          </div>
+          <div id="github-pill">Free on GitHub</div>
+        </section>
+
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+
+      /* ---- seek-safe initial state: everything delayed starts hidden via autoAlpha ---- */
+      gsap.set(["#s2", "#s3a", "#s3b", "#s3c", "#s4", "#s5"], { autoAlpha: 0 });
+      gsap.set(["#oldway", ".squiggle-wrap", "#s3b-label", "#s3c-label",
+                "#brand", "#tagline .w", "#github-pill", ".final-agent"], { autoAlpha: 0 });
+      gsap.set(".agent-dot", { autoAlpha: 0, scale: 0.3 });
+      gsap.set("#squiggle", { strokeDasharray: 1, strokeDashoffset: 1 });
+
+      const tl = gsap.timeline({ paused: true });
+
+      /* ================= S1 · 0.0–1.2 · ALT-TAB? ================= */
+      tl.from("#alttab", { y: -420, scale: 1.35, skewX: -14, duration: 0.45, ease: "power4.out" }, 0.0);
+      tl.to("#alttab", { keyframes: [{ x: -10 }, { x: 10 }, { x: -6 }, { x: 0 }], duration: 0.28, ease: "none" }, 0.42);
+      tl.to("#oldway", { autoAlpha: 1, duration: 0.18 }, 0.35);
+      tl.from("#oldway", { x: -70, duration: 0.3, ease: "power3.out" }, 0.35);
+      /* diagonal speed-lines streak through, two waves */
+      tl.fromTo("#sl1", { x: 0 }, { x: 3400, duration: 0.5, ease: "power2.in" }, 0.05);
+      tl.fromTo("#sl2", { x: 0 }, { x: 3600, duration: 0.55, ease: "power2.in" }, 0.15);
+      tl.fromTo("#sl3", { x: 0 }, { x: 3300, duration: 0.5, ease: "power2.in" }, 0.55);
+      /* whip out */
+      tl.to("#s1 .display, #s1 .micro", { x: -1700, skewX: -18, duration: 0.15, ease: "power2.in" }, 1.05);
+
+      /* ================= S2 · 1.2–2.4 · NEVER AGAIN ================= */
+      tl.set("#s1", { autoAlpha: 0 }, 1.2);
+      tl.set("#s2", { autoAlpha: 1 }, 1.2);
+      tl.fromTo("#never-line", { x: 1500, skewX: -18 }, { x: 0, skewX: 0, duration: 0.38, ease: "power4.out" }, 1.2);
+      /* wavy coral squiggle underline sweeps */
+      tl.to(".squiggle-wrap", { autoAlpha: 1, duration: 0.05 }, 1.58);
+      tl.to("#squiggle", { strokeDashoffset: 0, duration: 0.45, ease: "power2.out" }, 1.6);
+      /* notch pill whips across the top edge */
+      tl.fromTo("#notch-whip", { x: 2100 }, { x: -600, duration: 0.5, ease: "power1.inOut" }, 1.35);
+      tl.to("#never-line", { scale: 1.04, duration: 0.25, yoyo: true, repeat: 1, ease: "sine.inOut" }, 1.85);
+
+      /* ================= S3a · 2.4–3.2 · MIC ✕ MUTED ================= */
+      tl.set("#s2", { autoAlpha: 0 }, 2.4);
+      tl.set("#s3a", { autoAlpha: 1 }, 2.4);
+      tl.from(".w3a", { x: -900, skewX: -16, duration: 0.32, ease: "power4.out", stagger: 0.06 }, 2.4);
+      tl.from(".w3a-label", { y: 40, opacity: 0, duration: 0.3, ease: "power3.out" }, 2.62);
+      /* red mute dot flash (deterministic scale+shadow pulse) */
+      tl.to("#mutedot", {
+        scale: 1.6, boxShadow: "0 0 26px 8px rgba(255,59,48,0.9)",
+        duration: 0.16, yoyo: true, repeat: 3, ease: "sine.inOut"
+      }, 2.55);
+
+      /* ================= S3b · 3.2–4.0 · PROMPTER: INVISIBLE ================= */
+      tl.set("#s3a", { autoAlpha: 0 }, 3.2);
+      tl.set("#s3b", { autoAlpha: 1 }, 3.2);
+      tl.from("#prompter-kicker", { y: -60, duration: 0.25, ease: "power3.out" }, 3.2);
+      tl.from("#invisible-word", { scale: 0.6, duration: 0.3, ease: "back.out(2.2)" }, 3.25);
+      /* the capture-invisible gag: fades toward nothing, snaps back */
+      tl.to("#invisible-word", { opacity: 0.22, duration: 0.18, ease: "power2.in" }, 3.55);
+      tl.to("#invisible-word", { opacity: 1, duration: 0.08, ease: "power4.out" }, 3.78);
+      tl.to("#s3b-label", { autoAlpha: 1, duration: 0.15 }, 3.6);
+      tl.from("#s3b-label", { y: 34, duration: 0.25, ease: "power3.out" }, 3.6);
+
+      /* ================= S3c · 4.0–4.8 · 3 AGENTS RUNNING ================= */
+      tl.set("#s3b", { autoAlpha: 0 }, 4.0);
+      tl.set("#s3c", { autoAlpha: 1 }, 4.0);
+      tl.from("#big3", { scale: 0.5, duration: 0.32, ease: "back.out(2.4)" }, 4.0);
+      tl.from("#agents-line", { y: 90, duration: 0.3, ease: "power4.out" }, 4.12);
+      tl.to("#s3c-label", { autoAlpha: 1, duration: 0.15 }, 4.3);
+      tl.from("#s3c-label", { y: 30, duration: 0.25, ease: "power3.out" }, 4.3);
+      /* green agent dots tick on */
+      tl.to(".agent-dot", { autoAlpha: 1, scale: 1, duration: 0.18, ease: "back.out(3)", stagger: 0.12 }, 4.15);
+
+      /* ================= S4 · 4.8–6.2 · marquee rush + ONE GLANCE. ================= */
+      tl.set("#s3c", { autoAlpha: 0 }, 4.8);
+      tl.set("#s4", { autoAlpha: 1 }, 4.8);
+      /* three ticker rows, different speeds, opposite directions */
+      tl.fromTo("#row1", { x: 0 },     { x: -2200, duration: 1.4, ease: "none" }, 4.8);
+      tl.fromTo("#row2", { x: -2400 }, { x: 0,     duration: 1.4, ease: "none" }, 4.8);
+      tl.fromTo("#row3", { x: -400 },  { x: -3000, duration: 1.4, ease: "none" }, 4.8);
+      tl.from("#glance", { scale: 2.6, autoAlpha: 0, duration: 0.3, ease: "power4.out" }, 4.95);
+      tl.to("#glance", { keyframes: [{ x: -9 }, { x: 9 }, { x: -5 }, { x: 0 }], duration: 0.24, ease: "none" }, 5.25);
+      tl.to("#glance", { scale: 1.03, duration: 0.3, yoyo: true, repeat: 1, ease: "sine.inOut" }, 5.55);
+
+      /* ================= S5 · 6.2–9.0 · end card ================= */
+      tl.set("#s4", { autoAlpha: 0 }, 6.2);
+      tl.set("#s5", { autoAlpha: 1 }, 6.2);
+      tl.from("#acc1", { scale: 0, transformOrigin: "center", duration: 0.5, ease: "power3.out" }, 6.25);
+      tl.from("#acc2", { scale: 0, transformOrigin: "center", duration: 0.5, ease: "power3.out" }, 6.35);
+      tl.from("#acc3", { scale: 0, transformOrigin: "center", duration: 0.5, ease: "power3.out" }, 6.45);
+      /* notch glides down into place, agents alive */
+      tl.from("#notch-final", { y: -110, duration: 0.45, ease: "power3.out" }, 6.2);
+      tl.to(".final-agent", { autoAlpha: 1, duration: 0.2, stagger: 0.1 }, 6.5);
+      /* wordmark + tagline + CTA */
+      tl.to("#brand", { autoAlpha: 1, duration: 0.2 }, 6.45);
+      tl.from("#brand", { y: 130, duration: 0.45, ease: "power4.out" }, 6.45);
+      tl.to("#tagline .w", { autoAlpha: 1, duration: 0.18, stagger: 0.09 }, 6.85);
+      tl.from("#tagline .w", { y: 34, duration: 0.3, ease: "power3.out", stagger: 0.09 }, 6.85);
+      tl.to("#github-pill", { autoAlpha: 1, duration: 0.12 }, 7.35);
+      tl.from("#github-pill", { scale: 0.6, duration: 0.35, ease: "back.out(2.2)" }, 7.35);
+      /* hold_breath */
+      tl.to("#brand", { scale: 1.015, duration: 0.6, yoyo: true, repeat: 1, ease: "sine.inOut" }, 7.8);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

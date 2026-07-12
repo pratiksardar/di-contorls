@@ -1,0 +1,90 @@
+{
+  "category": "kinetic-type",
+  "duration_s": 9,
+  "fps": 30,
+  "canvas": { "w": 1920, "h": 1080, "aspect": "16:9" },
+  "style": "SPEED-RUSH sunrise editorial — light pastel (peach/butter/sky, warm off-white), ultra-condensed black display type slamming in with skew/scale motion-blur feel, marquee ticker strips at different speeds, diagonal speed-lines, hard cuts on beat, wavy squiggle underlines. The ONLY black element is the notch island pill (brand anchor) that the action whips past — red mute flash, green agent dots.",
+  "palette": ["#FFDDC9", "#FFF3C4", "#CDE9FF", "#FF8A6B", "#FFFBF5", "#1A1A1A"],
+  "font": "Anton (display, local woff2) + Space Mono 700 (micro-labels, local woff2)",
+  "beats": [0, 1.2, 2.4, 3.2, 4.0, 4.8, 6.2],
+  "export": "mp4",
+  "asset_needs": [],
+  "block": null,
+  "customize": {
+    "note": "hand-authored — the whip-pan/marquee/notch-anchor motif is a gap none of the 18 caption-* blocks cover; motion primitives per motion-vocabulary (slam, scale_punch, underline_sweep, shake, slide_left/right)"
+  },
+  "content": {
+    "scenes": [
+      {
+        "id": "s1-hook",
+        "start": 0.0,
+        "end": 1.2,
+        "text": "ALT-TAB?",
+        "emphasis_words": ["ALT-TAB?"],
+        "emotion": "irritated urgency",
+        "motion": "slam + skew settle on peach bg; diagonal speed-lines streak through; micro mono label 'the old way' ticks in",
+        "beats": [0.0]
+      },
+      {
+        "id": "s2-never",
+        "start": 1.2,
+        "end": 2.4,
+        "text": "NEVER AGAIN",
+        "emphasis_words": ["NEVER"],
+        "emotion": "defiant relief",
+        "motion": "horizontal whip-pan cut to butter-yellow; giant condensed 'NEVER AGAIN' scale_punch; wavy coral squiggle underline_sweep beneath AGAIN; notch pill whips across the top edge",
+        "beats": [1.2]
+      },
+      {
+        "id": "s3a-mic",
+        "start": 2.4,
+        "end": 3.2,
+        "text": "MIC ✕ MUTED",
+        "emphasis_words": ["MUTED"],
+        "emotion": "rapid-fire confidence",
+        "motion": "hard cut, coral-tint bg; word slides in from left with skew; notch pill top-center flashes RED mute dot; mono label 'system-wide'",
+        "beats": [2.4]
+      },
+      {
+        "id": "s3b-prompter",
+        "start": 3.2,
+        "end": 4.0,
+        "text": "PROMPTER: INVISIBLE",
+        "emphasis_words": ["INVISIBLE"],
+        "emotion": "sly magic",
+        "motion": "hard cut, sky-blue bg; 'INVISIBLE' fades to 35% then snaps back (capture-invisible gag); mono label 'not on your recording'",
+        "beats": [3.2]
+      },
+      {
+        "id": "s3c-agents",
+        "start": 4.0,
+        "end": 4.8,
+        "text": "3 AGENTS RUNNING",
+        "emphasis_words": ["3"],
+        "emotion": "power-user flex",
+        "motion": "hard cut, butter bg; giant '3' scale_punch; notch pill shows three GREEN dots ticking on in stagger; mono label 'claude · codex · live'",
+        "beats": [4.0]
+      },
+      {
+        "id": "s4-glance",
+        "start": 4.8,
+        "end": 6.2,
+        "text": "ONE GLANCE.",
+        "emphasis_words": ["ONE"],
+        "emotion": "peak rush → snap focus",
+        "motion": "marquee ticker strips (3 rows, different speeds, opposite directions) rush across peach bg while 'ONE GLANCE.' slams center with shake; strips decelerate visually via cut",
+        "beats": [4.8]
+      },
+      {
+        "id": "s5-endcard",
+        "start": 6.2,
+        "end": 9.0,
+        "text": "NotchControls — Stop alt-tabbing. Start glancing. — Free on GitHub",
+        "emphasis_words": ["NotchControls"],
+        "emotion": "calm sunrise resolve",
+        "motion": "whip settles onto warm off-white; notch pill glides to top-center with green dots alive; wordmark slide_bottom; tagline word_reveal; 'Free on GitHub' coral pill scale_punch; hold_breath",
+        "beats": [6.2]
+      }
+    ]
+  }
+}
