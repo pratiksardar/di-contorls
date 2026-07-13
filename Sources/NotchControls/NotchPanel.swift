@@ -46,7 +46,7 @@ final class NotchController {
     private let agentEvents: AgentEventCenter
 
     init(audio: AudioManager, camera: CameraMonitor, agentEvents: AgentEventCenter,
-         sessions: SessionMonitor,
+         sessions: SessionMonitor, shelf: ShelfStore,
          openTeleprompter: @escaping () -> Void,
          openSettings: @escaping () -> Void) {
         self.agentEvents = agentEvents
@@ -55,6 +55,7 @@ final class NotchController {
                              camera: camera,
                              agentEvents: agentEvents,
                              sessions: sessions,
+                             shelf: shelf,
                              state: state,
                              collapsedHeight: collapsedSize.height,
                              openTeleprompter: openTeleprompter,

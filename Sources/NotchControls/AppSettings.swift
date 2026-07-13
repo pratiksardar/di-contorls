@@ -20,6 +20,7 @@ enum Pref {
     static let projectColors = "pref.projectColors"
     static let subagentBadge = "pref.subagentBadge"
     static let mutedProjects = "pref.mutedProjects"
+    static let fileShelf = "pref.fileShelf"
 
     static func mutedProjectList() -> [String] {
         UserDefaults.standard.stringArray(forKey: mutedProjects) ?? []
@@ -51,6 +52,7 @@ enum Pref {
         quietEnd: 8 * 60,
         projectColors: true,
         subagentBadge: true,
+        fileShelf: true,
     ]
 
     static func enabled(_ key: String) -> Bool {
@@ -97,6 +99,7 @@ struct SettingsView: View {
     @AppStorage(Pref.quietEnd) private var quietEnd = 8 * 60
     @AppStorage(Pref.projectColors) private var projectColors = true
     @AppStorage(Pref.subagentBadge) private var subagentBadge = true
+    @AppStorage(Pref.fileShelf) private var fileShelf = true
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
     @State private var mutedProjects = Pref.mutedProjectList()
 
@@ -115,6 +118,7 @@ struct SettingsView: View {
                 Toggle("Camera in-use indicator", isOn: $cameraIndicator)
                 Toggle("Teleprompter button", isOn: $showTeleprompter)
                 Toggle("Running agent sessions list", isOn: $showSessions)
+                Toggle("File shelf (drop files on the notch)", isOn: $fileShelf)
             }
             Section("Sessions") {
                 Toggle("Per-project name colors", isOn: $projectColors)

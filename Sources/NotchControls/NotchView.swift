@@ -1,11 +1,14 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct NotchView: View {
     @ObservedObject var audio: AudioManager
     @ObservedObject var camera: CameraMonitor
     @ObservedObject var agentEvents: AgentEventCenter
     @ObservedObject var sessions: SessionMonitor
+    @ObservedObject var shelf: ShelfStore
     @ObservedObject var state: NotchState
+    @State private var dropTargeted = false
     let collapsedHeight: CGFloat
     let openTeleprompter: () -> Void
     let openSettings: () -> Void
@@ -15,6 +18,7 @@ struct NotchView: View {
     @AppStorage(Pref.showSessions) private var showSessions = true
     @AppStorage(Pref.projectColors) private var projectColors = true
     @AppStorage(Pref.subagentBadge) private var subagentBadge = true
+    @AppStorage(Pref.fileShelf) private var fileShelf = true
 
     var body: some View {
         VStack(spacing: 0) {
@@ -64,6 +68,9 @@ struct NotchView: View {
                         if !agentEvents.events.isEmpty {
                             eventList
                         }
+                        if fileShelf, !shelf.items.isEmpty || dropTargeted {
+                            shelfRow
+                        }
                         if showSessions, !sessions.sessions.isEmpty {
                             sessionList
                         }
@@ -85,7 +92,30 @@ struct NotchView: View {
                 .fill(Color.black)
                 .shadow(color: .black.opacity(state.expanded ? 0.45 : 0), radius: 12, y: 5)
         )
+        .overlay(
+            UnevenRoundedRectangle(bottomLeadingRadius: 18,
+                                   bottomTrailingRadius: 18,
+                                   style: .continuous)
+                .strokeBorder(Color.orange.opacity(dropTargeted ? 0.8 : 0), lineWidth: 2)
+                .allowsHitTesting(false)
+        )
         .onHover { state.onHover($0) }
+        .onDrop(of: [UTType.fileURL], isTargeted: fileShelf ? $dropTargeted : nil) { providers in
+            let group = DispatchGroup()
+            var dropped: [URL] = []
+            for provider in providers {
+                group.enter()
+                _ = provider.loadObject(ofClass: URL.self) { url, _ in
+                    if let url, url.isFileURL { dropped.append(url) }
+                    group.leave()
+                }
+            }
+            group.notify(queue: .main) { shelf.add(dropped) }
+            return true
+        }
+        .onChange(of: dropTargeted) { _, targeted in
+            if targeted { state.onHover(true) } // drag-hover opens the bay
+        }
     }
 
     private var eventList: some View {
@@ -283,6 +313,40 @@ struct NotchView: View {
             Divider()
             Button("Reveal in Finder") {
                 SessionMonitor.revealInFinder(session.directory)
+            }
+        }
+    }
+
+    private var shelfRow: some View {
+        VStack(spacing: 4) {
+            HStack {
+                Text("SHELF")
+                    .font(.system(size: 9, weight: .bold))
+                    .kerning(1.1)
+                    .foregroundStyle(.white.opacity(0.45))
+                Spacer()
+                if !shelf.items.isEmpty {
+                    Button("Clear") { shelf.clear() }
+                        .buttonStyle(.plain)
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.5))
+                        .hoverGlow(4)
+                }
+            }
+            .padding(.horizontal, 2)
+            if shelf.items.isEmpty {
+                Text("Drop files here — drag them out anywhere later")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.white.opacity(0.5))
+                    .padding(.vertical, 10)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        ForEach(shelf.items, id: \.self) { url in
+                            ShelfChip(url: url, store: shelf)
+                        }
+                    }
+                }
             }
         }
     }

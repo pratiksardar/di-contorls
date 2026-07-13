@@ -16,6 +16,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private let agentEvents = AgentEventCenter()
     private let sessions = SessionMonitor()
+    private let shelf = ShelfStore()
     private let settings = SettingsWindowController()
 
     static func main() {
@@ -36,6 +37,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         notch = NotchController(
             audio: audio, camera: camera, agentEvents: agentEvents, sessions: sessions,
+            shelf: shelf,
             openTeleprompter: { [weak self] in self?.teleprompter.toggle() },
             openSettings: { [weak self] in self?.settings.show() })
         setUpStatusItem()

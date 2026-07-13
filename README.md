@@ -1,49 +1,73 @@
+<div align="center">
+
+<img src=".github/assets/icon.png" width="110" alt="NotchControls icon" />
+
 # NotchControls
 
-macOS dynamic-island app that lives at the notch. Meeting controls for any app using your mic/camera (Slack, Meet, Zoom, …) plus a cockpit for your coding agents.
+**Your notch, on duty.**
+Mute anything, prompt yourself, and know the second a coding agent needs you.
 
-## Install
+[![Release](https://img.shields.io/github/v/release/pratiksardar/di-contorls?color=FF9F0A&label=release)](https://github.com/pratiksardar/di-contorls/releases)
+[![macOS 14+](https://img.shields.io/badge/macOS-14%2B-black)](#install)
+[![License: MIT](https://img.shields.io/badge/license-MIT-32D74B)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-CE4778)](CONTRIBUTING.md)
+[![Swift](https://img.shields.io/badge/Swift-5.9%20·%20zero%20deps-orange)](Package.swift)
 
-```bash
-git clone <repo-url> && cd controls
-make run                                  # build, bundle, launch
-build/NotchControls.app/Contents/MacOS/NotchControls install-hooks   # wire Claude Code + Codex
-```
+<img src=".github/assets/teaser.gif" width="720" alt="NotchControls teaser" />
 
-Requires macOS 14+. Downloaded release zips are ad-hoc signed — right-click → Open on first launch (see `docs/DISTRIBUTION.md`).
+*Your agents are waiting. You might be muted. Your script is showing.*
+
+</div>
+
+---
+
+## Why
+
+It's 2:47 PM. You're on a call, camera on. Behind the meeting window three coding agents are working — and one has been sitting on a permission prompt for twenty minutes. You're also not sure you ever unmuted. **Everything you're anxious about is invisible — and the one part of your screen you look at all day does nothing.**
+
+NotchControls turns the MacBook notch into a cockpit for your work session.
 
 ## Features
 
-- **System-wide mic mute** — mutes the default input device at the CoreAudio level, so every app goes silent at once. Devices without a hardware mute control fall back to volume-0 (previous volume restored on unmute). Mute state follows the default device when you switch mics.
-- **Mic in-use indicator** — orange mic icon when any app has the mic open, red when muted.
-- **Camera in-use indicator** — green camera icon when any app is using a camera. (macOS offers no supported way to force-off the camera for other apps — that needs a CMIO extension, see Phase 2.)
-- **Teleprompter** — floating always-on-top panel just under the camera. Type/paste a script, press play, adjust scroll speed and font size. Stays above Meet/Zoom, script persists across launches.
-- **Agent notifications** — the island pops open like a live activity when a coding agent needs input (orange, persists as a pulsing bell badge until dismissed) or finishes a run (green, auto-dismisses, coalesced per project). Banners show *agent · project*; pop-ups hold automatically during meetings (mic/camera live) and in quiet hours; right-click a banner to mute its project; the clock button shows recent history. `install-hooks` wires Claude Code (`Notification` + `Stop` hooks) and Codex (`notify`) in one command. Any tool can post events:
+| | |
+|---|---|
+| 🎙️ **System-wide mic mute** | Device-level CoreAudio mute — every app (Meet, Slack, Zoom…) goes silent with one click at eye level, or `⌥⇧M` anywhere. Follows you across mic switches. |
+| 🤖 **Agent notifications** | Claude Code / Codex banners the second a session needs input or finishes. Click a banner → land in the owning window. Coalesced, per-project mutable, meeting-aware (holds while your mic/camera is live) + quiet hours. |
+| 📊 **Live session fleet** | Every `claude`/`codex` session on your machine: working / idle / **needs-you**, project names in stable per-project colors, subagent counts, right-click → open in your editor. |
+| 📜 **Invisible teleprompter** | A prompter right under the camera that is **invisible in screen shares and recordings** — Zoom, Meet, OBS see nothing. Drag-to-scrub, live speed keys, font styles, `.md` import. |
+| 🗂️ **File shelf** | Drag files onto the notch to stash them; drag them out anywhere later. |
+| 📷 **Camera indicator** | Green dot the moment any app opens a camera. |
+| 🎛️ **Yours to shape** | Per-module toggles, System/Light/Dark themes, launch at login. MIT, zero dependencies. |
 
-  ```bash
-  build/NotchControls.app/Contents/MacOS/NotchControls notify \
-    --agent "My Tool" --kind attention|done --message "…"
-  build/NotchControls.app/Contents/MacOS/NotchControls prompter   # toggle teleprompter
-  ```
+## Install
 
-- **Click-to-focus** — clicking an agent banner jumps to the terminal/editor that owns the session (the notify CLI records its GUI ancestor via the process tree) and clears the event.
-- **Sessions dashboard** — the expanded island lists every `claude`/`codex` CLI session running on the machine (argv0 match + controlling-TTY filter to exclude app daemons), with project folder and elapsed time; click a row to jump to its window.
-- **Settings** — gear icon on the island, menu bar → Settings…, or `NotchControls settings`. Per-module toggles: camera indicator, teleprompter button, sessions list, agent notifications, auto-expand, attention sound, prompter capture-invisibility.
-- **Themes** — System / Light / Dark picker in Settings, applied live to the teleprompter and settings windows. The island itself stays black by design: it extends the physical notch.
-- **Global hotkey** — ⌥⇧M toggles mute from anywhere.
-- Menu bar item (mic icon) with mute/teleprompter/quit; icon shows mute state.
-
-## Usage
+**[Download the latest release](https://github.com/pratiksardar/di-contorls/releases)** (DMG or zip), or build from source:
 
 ```bash
-make run     # build release, bundle build/NotchControls.app, launch
-make dev     # swift run (debug, no bundle)
+git clone https://github.com/pratiksardar/di-contorls.git && cd di-contorls
+make run                                  # build, bundle, launch
+build/NotchControls.app/Contents/MacOS/NotchControls install-hooks   # wire Claude Code + Codex (one command, idempotent)
 ```
 
-Hover the notch to expand the island (Mute / Prompter buttons, device + camera status). Works on non-notch Macs too — floats at top-center.
+Requires macOS 14+. Release builds are ad-hoc signed — **right-click → Open** on first launch.
 
-## Phase 2 ideas
+## The CLI
 
-- AI note-taker (Meetily-style): ScreenCaptureKit system-audio + mic capture → whisper.cpp → LLM summary.
-- Real camera blocking via a CMIO virtual-camera extension.
-- Per-app mic activity attribution.
+The app binary doubles as a CLI any tool can call:
+
+```bash
+NotchControls notify --agent "My Tool" --kind attention|done --message "…"   # post a banner
+NotchControls install-hooks   # wire Claude Code + Codex hooks
+NotchControls prompter        # toggle the teleprompter
+NotchControls settings        # open settings
+```
+
+CI finished? Deploy needs approval? Pipe it to your notch.
+
+## Contributing
+
+PRs are very welcome — see **[CONTRIBUTING.md](CONTRIBUTING.md)** for setup, project layout, and conventions. Good first areas: prompter voice-follow scrolling, quota alerts, exact-tab focus, `.pptx` script import. The full plan lives in [ROADMAP.md](ROADMAP.md); design principles in [PRODUCT.md](PRODUCT.md).
+
+## License
+
+[MIT](LICENSE) © Pratik Sardar
