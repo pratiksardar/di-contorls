@@ -19,6 +19,7 @@ struct NotchView: View {
     @AppStorage(Pref.projectColors) private var projectColors = true
     @AppStorage(Pref.subagentBadge) private var subagentBadge = true
     @AppStorage(Pref.fileShelf) private var fileShelf = true
+    @AppStorage(Pref.cameraGuard) private var cameraGuard = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -52,9 +53,21 @@ struct NotchView: View {
                 }
                 Spacer()
                 if cameraIndicator {
-                    Image(systemName: "video.fill")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(camera.cameraInUse ? .green : .white.opacity(0.25))
+                    Button {
+                        cameraGuard.toggle()
+                    } label: {
+                        Image(systemName: cameraGuard ? "video.badge.checkmark" : "video.fill")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(camera.cameraInUse ? .green
+                                             : cameraGuard ? .orange : .white.opacity(0.25))
+                            .frame(width: 24, height: 24)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .hoverGlow(6)
+                    .help(cameraGuard
+                          ? "Camera Guard ON — alerts the instant any app starts your camera"
+                          : "Camera Guard off — click to arm (macOS can't force the camera off system-wide)")
                 }
             }
             .padding(.horizontal, 16)
@@ -426,6 +439,13 @@ struct NotchView: View {
                     symbol: audio.isMuted ? "mic.slash.fill" : "mic.fill",
                     tint: audio.isMuted ? Color.red : Color.white.opacity(0.14),
                     action: audio.toggleMute)
+                if cameraIndicator {
+                    islandButton(
+                        title: cameraGuard ? "Guarded" : "Guard",
+                        symbol: cameraGuard ? "video.badge.checkmark" : "video",
+                        tint: cameraGuard ? Color.orange.opacity(0.3) : Color.white.opacity(0.14),
+                        action: { cameraGuard.toggle() })
+                }
                 if showTeleprompter {
                     islandButton(
                         title: "Prompter",

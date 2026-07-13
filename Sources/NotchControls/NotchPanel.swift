@@ -84,7 +84,7 @@ final class NotchController {
             .sink { [weak self] previous, current in
                 guard let self, let newest = current.first,
                       !previous.contains(newest) else { return }
-                self.popOpen()
+                self.popOpen(force: newest.urgent)
             }
             .store(in: &cancellables)
 
@@ -108,8 +108,8 @@ final class NotchController {
     }
 
     /// Expand without hover (agent banner), then auto-collapse unless the user moved in.
-    private func popOpen() {
-        guard Pref.enabled(Pref.autoExpand), !agentEvents.suppressPopups() else { return }
+    private func popOpen(force: Bool = false) {
+        guard force || (Pref.enabled(Pref.autoExpand) && !agentEvents.suppressPopups()) else { return }
         bannerWork?.cancel()
         applyFrame(expanded: true, animate: false)
         withAnimation(Self.expandAnimation) {

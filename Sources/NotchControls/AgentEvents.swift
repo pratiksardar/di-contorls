@@ -20,6 +20,7 @@ final class AgentEventCenter: ObservableObject {
         let kind: Kind
         let sourcePID: pid_t?
         let directory: String?
+        var urgent = false // bypasses meeting-quiet/quiet-hours (e.g. camera guard)
         let date = Date()
 
         var directoryName: String? {
@@ -57,20 +58,20 @@ final class AgentEventCenter: ObservableObject {
     }
 
     func ingest(agent: String, kind: Kind, message: String,
-                sourcePID: pid_t? = nil, directory: String? = nil) {
-        guard Pref.enabled(Pref.agentNotifications) else { return }
+                sourcePID: pid_t? = nil, directory: String? = nil, urgent: Bool = false) {
+        guard urgent || Pref.enabled(Pref.agentNotifications) else { return }
         if let directory, Pref.mutedProjectList().contains(directory) { return }
         // coalesce: a new event replaces the previous one of the same kind
         // from the same agent+project (kills repeated Stop noise)
         events.removeAll { $0.kind == kind && $0.agent == agent && $0.directory == directory }
         let event = AgentEvent(agent: agent, message: message, kind: kind,
-                               sourcePID: sourcePID, directory: directory)
+                               sourcePID: sourcePID, directory: directory, urgent: urgent)
         events.insert(event, at: 0)
         if events.count > 6 { events.removeLast(events.count - 6) }
         history.insert(event, at: 0)
         if history.count > 20 { history.removeLast(history.count - 20) }
         if kind == .attention {
-            if Pref.enabled(Pref.attentionSound), !suppressPopups() {
+            if Pref.enabled(Pref.attentionSound), urgent || !suppressPopups() {
                 NSSound(named: "Ping")?.play()
             }
         } else {
@@ -90,6 +91,10 @@ final class AgentEventCenter: ObservableObject {
 
     func dismiss(_ id: UUID) {
         events.removeAll { $0.id == id }
+    }
+
+    func dismissAll(agent: String) {
+        events.removeAll { $0.agent == agent }
     }
 }
 

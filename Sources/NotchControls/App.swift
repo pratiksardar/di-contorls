@@ -54,6 +54,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             default: break
             }
         }
+        // camera guard: urgent banner the instant any app turns the camera on
+        camera.$cameraInUse
+            .removeDuplicates()
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] live in
+                guard let self else { return }
+                if live, Pref.enabled(Pref.cameraGuard) {
+                    self.agentEvents.ingest(agent: "Camera Guard", kind: .attention,
+                                            message: "Your camera just went live",
+                                            urgent: true)
+                } else if !live {
+                    self.agentEvents.dismissAll(agent: "Camera Guard")
+                }
+            }
+            .store(in: &cancellables)
         audio.$isMuted
             .receive(on: DispatchQueue.main)
             .sink { [weak self] muted in

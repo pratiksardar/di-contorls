@@ -23,7 +23,8 @@ final class CameraMonitor: ObservableObject {
     }
 
     private func poll() {
-        guard Pref.enabled(Pref.cameraIndicator) else {
+        // guard also needs detection even if the indicator is hidden
+        guard Pref.enabled(Pref.cameraIndicator) || Pref.enabled(Pref.cameraGuard) else {
             if cameraInUse { cameraInUse = false }
             return
         }
