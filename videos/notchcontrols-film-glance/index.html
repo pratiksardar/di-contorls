@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>notchcontrols — one glance, one truth</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      /* ---- frozen local fonts (deterministic render) ---- */
+      @font-face {
+        font-family: "Inter";
+        src: url("assets/fonts/Inter-Regular.woff2") format("woff2");
+        font-weight: 400;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Inter";
+        src: url("assets/fonts/Inter-Medium.woff2") format("woff2");
+        font-weight: 500;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Space Grotesk";
+        src: url("assets/fonts/SpaceGrotesk-500.woff2") format("woff2");
+        font-weight: 500;
+        font-display: block;
+      }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #0a0a0c;
+      }
+
+      /* ---- palette: color exists ONLY as light ---- */
+      :root {
+        --field: #0a0a0c;
+        --island: #000000;
+        --rim: rgba(255, 255, 255, 0.09);
+        --ink: #d6d6dc;
+        --ink-dim: #9a9aa4;
+        --orange: #ff9f0a;
+        --red: #ff453a;
+        --green: #32d74b;
+        --idle: #1d1d22;
+      }
+
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        font-family: "Inter", sans-serif;
+        background: transparent;
+      }
+      #bg { position: absolute; inset: 0; background: var(--field); }
+      #vignette {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse 68% 58% at 50% 42%, rgba(255, 255, 255, 0.014) 0%, transparent 46%, rgba(0, 0, 0, 0.62) 100%);
+      }
+      /* deterministic film grain: fixed-seed SVG turbulence tile, jittered by the timeline */
+      #grain {
+        position: absolute;
+        inset: -80px;
+        opacity: 0.055;
+        pointer-events: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='7' stitchTiles='stitch'/></filter><rect width='260' height='260' filter='url(%23n)'/></svg>");
+        mix-blend-mode: overlay;
+      }
+
+      /* ---- act 1: the island in 3D space ---- */
+      #act1 { position: absolute; inset: 0; }
+      #view { position: absolute; inset: 0; perspective: 1400px; perspective-origin: 50% 42%; }
+      #cam { position: absolute; inset: 0; transform-style: preserve-3d; }
+      .layer { position: absolute; inset: 0; }
+      /* far glow layer sits behind, near dust in front — parallax under camera drift */
+      #layer-far { transform: translateZ(-260px) scale(1.19); }
+      #layer-island { transform: translateZ(0); }
+      #layer-near { transform: translateZ(140px) scale(0.9); }
+
+      /* the island pill — ALWAYS pure black; the rim light makes black-on-black read */
+      #pill {
+        position: absolute;
+        left: 640px;
+        top: 365px;
+        width: 640px;
+        height: 150px;
+        border-radius: 75px;
+        background: var(--island);
+        box-shadow:
+          inset 0 1.5px 0 rgba(255, 255, 255, 0.10),
+          inset 0 -1px 0 rgba(255, 255, 255, 0.035),
+          0 0 0 1px var(--rim),
+          0 26px 60px rgba(0, 0, 0, 0.6);
+      }
+      #trace { position: absolute; left: 632px; top: 357px; overflow: visible; }
+      #trace path { fill: none; stroke: rgba(255, 255, 255, 0.55); stroke-width: 1.5; }
+
+      .dot {
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--idle);
+        top: 431px;
+      }
+      #d-mic { left: 701px; }
+      #d-a1 { left: 1121px; }
+      #d-a2 { left: 1171px; }
+      #d-a3 { left: 1221px; }
+
+      /* layered blurred duplicates = bloom. small core / mid halo / wide spill */
+      .glow { position: absolute; border-radius: 50%; pointer-events: none; }
+      .g-core { width: 120px; height: 120px; filter: blur(14px); }
+      .g-halo { width: 380px; height: 380px; filter: blur(46px); }
+      .g-spill { width: 900px; height: 620px; border-radius: 50%; filter: blur(90px); }
+      .g-orange.g-core { background: radial-gradient(circle, rgba(255, 159, 10, 0.95), transparent 70%); }
+      .g-orange.g-halo { background: radial-gradient(circle, rgba(255, 159, 10, 0.5), transparent 70%); }
+      .g-orange.g-spill { background: radial-gradient(ellipse, rgba(255, 159, 10, 0.22), transparent 68%); }
+      .g-red.g-core { background: radial-gradient(circle, rgba(255, 69, 58, 0.95), transparent 70%); }
+      .g-red.g-halo { background: radial-gradient(circle, rgba(255, 69, 58, 0.5), transparent 70%); }
+      .g-red.g-spill { background: radial-gradient(ellipse, rgba(255, 69, 58, 0.22), transparent 68%); }
+      .g-green.g-core { background: radial-gradient(circle, rgba(50, 215, 75, 0.9), transparent 70%); }
+      .g-green.g-halo { background: radial-gradient(circle, rgba(50, 215, 75, 0.45), transparent 70%); }
+      .g-green.g-spill { background: radial-gradient(ellipse, rgba(50, 215, 75, 0.2), transparent 68%); }
+
+      /* light pooling on the "desk surface" below the island */
+      .pool {
+        position: absolute;
+        top: 640px;
+        width: 1100px;
+        height: 220px;
+        left: 410px;
+        border-radius: 50%;
+        filter: blur(70px);
+      }
+      #pool-orange { background: radial-gradient(ellipse, rgba(255, 159, 10, 0.16), transparent 70%); }
+      #pool-red { background: radial-gradient(ellipse, rgba(255, 69, 58, 0.16), transparent 70%); }
+      #pool-green { background: radial-gradient(ellipse, rgba(50, 215, 75, 0.14), transparent 70%); left: 560px; }
+
+      /* mic waveform under the island */
+      #wave { position: absolute; left: 810px; top: 585px; }
+      #wave polyline { fill: none; stroke: rgba(214, 214, 220, 0.5); stroke-width: 2; stroke-linecap: round; }
+
+      /* ripple rings + rising motes (green beat) */
+      .ring {
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        top: 431px;
+        border-radius: 50%;
+        border: 1.5px solid rgba(50, 215, 75, 0.8);
+      }
+      #r-1 { left: 1121px; }
+      #r-2 { left: 1171px; }
+      #r-3 { left: 1221px; }
+      .mote {
+        position: absolute;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: rgba(50, 215, 75, 0.85);
+        filter: blur(0.5px);
+      }
+
+      /* beat 5: converging orbs + conic whip + bloom flash */
+      .orb { position: absolute; width: 22px; height: 22px; border-radius: 50%; }
+      .orb .halo {
+        position: absolute;
+        left: -29px;
+        top: -29px;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        filter: blur(16px);
+      }
+      #orb-o { background: var(--orange); }
+      #orb-o .halo { background: radial-gradient(circle, rgba(255, 159, 10, 0.8), transparent 70%); }
+      #orb-r { background: var(--red); }
+      #orb-r .halo { background: radial-gradient(circle, rgba(255, 69, 58, 0.8), transparent 70%); }
+      #orb-g { background: var(--green); }
+      #orb-g .halo { background: radial-gradient(circle, rgba(50, 215, 75, 0.8), transparent 70%); }
+
+      /* light-streak whip: a bright dash racing the pill's own silhouette */
+      #whipsvg { position: absolute; left: 640px; top: 365px; overflow: visible; }
+      #whip-glow { fill: none; stroke: rgba(255, 214, 140, 0.9); stroke-width: 22; stroke-linecap: round; filter: blur(12px); }
+      #whip-core { fill: none; stroke: rgba(255, 255, 255, 1); stroke-width: 5; stroke-linecap: round; }
+      /* energy core blooming inside the pill at the peak */
+      #core-bloom {
+        position: absolute;
+        left: 810px;
+        top: 290px;
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.95), rgba(255, 214, 140, 0.4) 45%, transparent 70%);
+        filter: blur(26px);
+      }
+      #flash {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse 55% 45% at 50% 42%, rgba(255, 255, 255, 0.95), rgba(240, 240, 245, 0.35) 45%, transparent 75%);
+      }
+
+      /* quiet type — small caps, generous tracking */
+      .label {
+        position: absolute;
+        left: 0;
+        width: 1920px;
+        top: 700px;
+        text-align: center;
+        font-family: "Inter", sans-serif;
+        font-weight: 400;
+        font-size: 27px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+      .label .c-orange { color: var(--orange); }
+      .label .c-red { color: var(--red); }
+      .label .c-green { color: var(--green); }
+
+      /* ---- act 2: end lockup ---- */
+      #act2 {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 120px 160px;
+        gap: 0;
+      }
+      #pill2 {
+        width: 380px;
+        height: 92px;
+        border-radius: 46px;
+        background: var(--island);
+        box-shadow:
+          inset 0 1.5px 0 rgba(255, 255, 255, 0.14),
+          inset 0 -1px 0 rgba(255, 255, 255, 0.04),
+          0 0 0 1px rgba(255, 255, 255, 0.16),
+          0 0 60px rgba(255, 255, 255, 0.03),
+          0 20px 50px rgba(0, 0, 0, 0.6);
+      }
+      #wordmark {
+        margin-top: 66px;
+        font-family: "Space Grotesk", "Inter", sans-serif;
+        font-weight: 500;
+        font-size: 84px;
+        letter-spacing: 0.1em;
+        color: #f2f2f5;
+      }
+      #wordmark .wm { display: inline-block; }
+      #principle {
+        margin-top: 30px;
+        font-family: "Inter", sans-serif;
+        font-weight: 400;
+        font-size: 30px;
+        letter-spacing: 0.06em;
+        color: var(--ink);
+      }
+      #github {
+        margin-top: 54px;
+        font-family: "Inter", sans-serif;
+        font-weight: 400;
+        font-size: 19px;
+        letter-spacing: 0.34em;
+        text-transform: uppercase;
+        color: var(--ink-dim);
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="15"
+      data-fps="30"
+      data-width="1920"
+      data-height="1080"
+    >
+      <div id="bg"></div>
+
+      <!-- act 1 · the island · 0.00–11.50 -->
+      <div id="act1" class="clip" data-start="0" data-duration="11.5" data-track-index="1" data-layout-allow-overflow="true" data-layout-allow-occlusion="true">
+        <div id="view">
+          <div id="cam">
+            <!-- far layer: wide light spills (deepest parallax) -->
+            <div id="layer-far" class="layer">
+              <div id="go-spill" class="glow g-orange g-spill" style="left: 260px; top: 130px"></div>
+              <div id="gr-spill" class="glow g-red g-spill" style="left: 260px; top: 130px"></div>
+              <div id="gg-spill" class="glow g-green g-spill" style="left: 720px; top: 130px"></div>
+            </div>
+
+            <!-- island layer -->
+            <div id="layer-island" class="layer">
+              <div id="pool-orange" class="pool"></div>
+              <div id="pool-red" class="pool"></div>
+              <div id="pool-green" class="pool"></div>
+
+              <div id="go-halo" class="glow g-orange g-halo" style="left: 520px; top: 250px"></div>
+              <div id="gr-halo" class="glow g-red g-halo" style="left: 520px; top: 250px"></div>
+              <div id="gg-halo" class="glow g-green g-halo" style="left: 986px; top: 250px"></div>
+
+              <div id="pill"></div>
+              <svg id="trace" width="656" height="166" viewBox="0 0 656 166">
+                <path id="trace-path" d="M 83 1.5 L 573 1.5 A 81.5 81.5 0 0 1 573 164.5 L 83 164.5 A 81.5 81.5 0 0 1 83 1.5 Z" />
+              </svg>
+
+              <div id="go-core" class="glow g-orange g-core" style="left: 650px; top: 380px"></div>
+              <div id="gr-core" class="glow g-red g-core" style="left: 650px; top: 380px"></div>
+              <div id="gg-core" class="glow g-green g-core" style="left: 1116px; top: 380px"></div>
+
+              <div id="d-mic" class="dot"></div>
+              <div id="d-a1" class="dot"></div>
+              <div id="d-a2" class="dot"></div>
+              <div id="d-a3" class="dot"></div>
+
+              <div id="r-1" class="ring"></div>
+              <div id="r-2" class="ring"></div>
+              <div id="r-3" class="ring"></div>
+              <div id="motes"></div>
+
+              <svg id="wave" width="300" height="44" viewBox="0 0 300 44">
+                <polyline id="wave-line" points="0,22 20,22 34,10 48,34 62,16 76,28 90,8 104,36 118,18 132,26 146,12 160,32 174,20 188,24 202,10 216,34 230,16 244,28 258,22 300,22" />
+              </svg>
+
+              <div id="orb-o" class="orb"><div class="halo"></div></div>
+              <div id="orb-r" class="orb"><div class="halo"></div></div>
+              <div id="orb-g" class="orb"><div class="halo"></div></div>
+              <div id="core-bloom"></div>
+              <svg id="whipsvg" width="640" height="150" viewBox="0 0 640 150">
+                <path id="whip-glow" d="M 75 0 L 565 0 A 75 75 0 0 1 565 150 L 75 150 A 75 75 0 0 1 75 0 Z" />
+                <path id="whip-core" d="M 75 0 L 565 0 A 75 75 0 0 1 565 150 L 75 150 A 75 75 0 0 1 75 0 Z" />
+              </svg>
+            </div>
+
+            <!-- near layer: faint foreground dust (fastest parallax) -->
+            <div id="layer-near" class="layer">
+              <div id="dust"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="label-1" class="label">Your Mac has a dark corner</div>
+        <div id="label-2" class="label"><span class="c-orange">orange</span>&ensp;— someone needs you</div>
+        <div id="label-3" class="label"><span class="c-red">red</span>&ensp;— the room can't hear you</div>
+        <div id="label-4" class="label"><span class="c-green">green</span>&ensp;— your agents are done</div>
+
+        <div id="flash"></div>
+      </div>
+
+      <!-- act 2 · lockup · 11.50–15.00 -->
+      <div id="act2" class="clip" data-start="11.5" data-duration="3.5" data-track-index="2" data-layout-allow-occlusion="true">
+        <div id="pill2"></div>
+        <div id="wordmark"><span class="wm">N</span><span class="wm">o</span><span class="wm">t</span><span class="wm">c</span><span class="wm">h</span><span class="wm">C</span><span class="wm">o</span><span class="wm">n</span><span class="wm">t</span><span class="wm">r</span><span class="wm">o</span><span class="wm">l</span><span class="wm">s</span></div>
+        <div id="principle">One glance. One truth.</div>
+        <div id="github">Free on GitHub</div>
+      </div>
+
+      <!-- cinematic overlays above everything -->
+      <div id="vignette" data-layout-allow-occlusion="true"></div>
+      <div id="grain" data-layout-allow-occlusion="true"></div>
+
+      <!-- ---- audio (framework-owned, cinematic levels) ---- -->
+      <audio id="au-swell" src="assets/sfx/impact-bass-1.mp3" data-start="0" data-duration="2.12" data-track-index="10" data-volume="0.35"></audio>
+      <audio id="au-chime" src="assets/sfx/chime.mp3" data-start="2.55" data-duration="2.4" data-track-index="11" data-volume="0.25"></audio>
+      <audio id="au-click" src="assets/sfx/click.mp3" data-start="5" data-duration="0.37" data-track-index="11" data-volume="0.5"></audio>
+      <audio id="au-cs1" src="assets/sfx/click-soft.mp3" data-start="7.15" data-duration="0.37" data-track-index="11" data-volume="0.4"></audio>
+      <audio id="au-cs2" src="assets/sfx/click-soft.mp3" data-start="7.45" data-duration="0.37" data-track-index="12" data-volume="0.4"></audio>
+      <audio id="au-cs3" src="assets/sfx/click-soft.mp3" data-start="7.75" data-duration="0.37" data-track-index="11" data-volume="0.4"></audio>
+      <!-- riser pre-trimmed: peak lands exactly on the 11.50 hard cut -->
+      <audio id="au-riser" src="assets/sfx/riser-tail-2p5.mp3" data-start="9" data-duration="2.5" data-track-index="12" data-volume="0.65"></audio>
+      <audio id="au-cut" src="assets/sfx/impact-bass-2.mp3" data-start="11.5" data-duration="2.59" data-track-index="10" data-volume="0.7"></audio>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const F = 1 / 30;
+
+      /* ---- deterministic seeded PRNG (mulberry32) for motes / grain jitter ---- */
+      function prng(seed) {
+        return function () {
+          seed |= 0;
+          seed = (seed + 0x6d2b79f5) | 0;
+          let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+          t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+          return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+
+      /* ---- build seeded motes (green beat) + dust (parallax foreground) ---- */
+      const rnd = prng(20260712);
+      const motesEl = document.getElementById("motes");
+      const motes = [];
+      for (let i = 0; i < 14; i++) {
+        const m = document.createElement("div");
+        m.className = "mote";
+        m.style.left = 1090 + Math.floor(rnd() * 190) + "px";
+        m.style.top = 430 + Math.floor(rnd() * 20) + "px";
+        motesEl.appendChild(m);
+        motes.push(m);
+      }
+      const dustEl = document.getElementById("dust");
+      for (let i = 0; i < 16; i++) {
+        const d = document.createElement("div");
+        d.style.cssText =
+          "position:absolute;border-radius:50%;background:rgba(214,214,220," +
+          (0.05 + rnd() * 0.07).toFixed(3) +
+          ");width:" + (2 + Math.floor(rnd() * 3)) + "px;height:" + (2 + Math.floor(rnd() * 3)) + "px;" +
+          "left:" + Math.floor(rnd() * 1920) + "px;top:" + Math.floor(200 + rnd() * 700) + "px;filter:blur(1px)";
+        dustEl.appendChild(d);
+      }
+
+      /* ---- initial hidden state (seek-safe autoAlpha gating) ---- */
+      const HIDDEN = [
+        "#pill", "#trace",
+        "#go-core", "#go-halo", "#go-spill", "#pool-orange",
+        "#gr-core", "#gr-halo", "#gr-spill", "#pool-red",
+        "#gg-core", "#gg-halo", "#gg-spill", "#pool-green",
+        "#wave", "#r-1", "#r-2", "#r-3",
+        "#orb-o", "#orb-r", "#orb-g", "#whipsvg", "#core-bloom", "#flash",
+        "#label-1", "#label-2", "#label-3", "#label-4",
+      ];
+      HIDDEN.forEach((s) => gsap.set(s, { autoAlpha: 0 }));
+      gsap.set(motes, { autoAlpha: 0 });
+
+      /* trace path draw setup — measured once at build (deterministic) */
+      const tracePath = document.getElementById("trace-path");
+      const L = tracePath.getTotalLength();
+      gsap.set(tracePath, { strokeDasharray: L, strokeDashoffset: L });
+
+      /* whip streak: short bright dash racing the pill silhouette (dashoffset laps) */
+      const whipPaths = ["#whip-core", "#whip-glow"].map((s) => document.querySelector(s));
+      const WL = whipPaths[0].getTotalLength();
+      whipPaths.forEach((p) => gsap.set(p, { strokeDasharray: WL * 0.16 + " " + WL * 0.84, strokeDashoffset: 0 }));
+
+      /* ================= beat 1 · darkness → hairline (0.0–2.5) ================= */
+      tl.to("#trace", { autoAlpha: 1, duration: 0.2, ease: "none" }, 0.15);
+      tl.to(tracePath, { strokeDashoffset: 0, duration: 1.5, ease: "power2.inOut" }, 0.25);
+      // the pill body resolves under the finished trace; trace hands off to the rim light
+      tl.to("#pill", { autoAlpha: 1, duration: 0.9, ease: "power2.inOut" }, 1.1);
+      tl.to("#trace", { autoAlpha: 0, duration: 0.55, ease: "power2.in" }, 1.9);
+      tl.fromTo("#label-1", { y: 16, filter: "blur(10px)" }, { y: 0, filter: "blur(0px)", duration: 0.9, ease: "power2.out" }, 1.0);
+      tl.to("#label-1", { autoAlpha: 1, duration: 0.9, ease: "power2.out" }, 1.0);
+      tl.to("#label-1", { autoAlpha: 0, duration: 0.35, ease: "power2.in" }, 2.35);
+
+      /* ---- camera drift: slow lateral parallax across the whole act ---- */
+      tl.fromTo("#cam", { x: -26, rotationY: -1.1 }, { x: 26, rotationY: 1.1, duration: 9, ease: "sine.inOut" }, 2.5);
+
+      /* ================= beat 2 · ORANGE (2.5–5.0) ================= */
+      tl.to("#d-mic", { backgroundColor: "#ff9f0a", boxShadow: "0 0 18px rgba(255,159,10,0.9)", duration: 0.3, ease: "power2.out" }, 2.55);
+      ["#go-core", "#go-halo", "#go-spill"].forEach((s, i) => {
+        tl.fromTo(s, { scale: 0.55 }, { scale: 1, duration: 1.1, ease: "power2.out" }, 2.55 + i * 0.09);
+        tl.to(s, { autoAlpha: 1, duration: 0.9, ease: "power2.out" }, 2.55 + i * 0.09);
+      });
+      tl.to("#pool-orange", { autoAlpha: 0.9, duration: 1.2, ease: "power2.out" }, 2.75);
+      // the glow breathes — light, not a static blob
+      tl.to("#go-halo", { scale: 1.1, duration: 0.55, ease: "sine.inOut", yoyo: true, repeat: 1 }, 3.78);
+      tl.fromTo("#label-2", { y: 14, filter: "blur(8px)" }, { y: 0, filter: "blur(0px)", duration: 0.8, ease: "power2.out" }, 3.1);
+      tl.to("#label-2", { autoAlpha: 1, duration: 0.8, ease: "power2.out" }, 3.1);
+      // live mic waveform fades up under the island
+      tl.to("#wave", { autoAlpha: 0.85, duration: 0.7, ease: "power2.out" }, 3.4);
+      tl.to("#wave-line", {
+        keyframes: [
+          { scaleY: 0.55, duration: 0.4 },
+          { scaleY: 1.0, duration: 0.35 },
+          { scaleY: 0.5, duration: 0.4 },
+          { scaleY: 0.9, duration: 0.45 },
+        ],
+        transformOrigin: "50% 50%",
+        ease: "sine.inOut",
+      }, 3.4);
+      tl.to("#label-2", { autoAlpha: 0, duration: 0.3, ease: "power2.in" }, 4.65);
+
+      /* ================= beat 3 · RED snap (5.0–7.0) ================= */
+      tl.to("#d-mic", { backgroundColor: "#ff453a", boxShadow: "0 0 18px rgba(255,69,58,0.9)", duration: 0.12, ease: "none" }, 5.0);
+      ["#go-core", "#go-halo", "#go-spill"].forEach((s) => tl.to(s, { autoAlpha: 0, duration: 0.12, ease: "none" }, 5.0));
+      tl.to("#pool-orange", { autoAlpha: 0, duration: 0.15, ease: "none" }, 5.0);
+      ["#gr-core", "#gr-halo", "#gr-spill"].forEach((s, i) => {
+        tl.fromTo(s, { scale: 0.85 }, { scale: 1, duration: 0.5, ease: "power3.out" }, 5.02 + i * 0.04);
+        tl.to(s, { autoAlpha: 1, duration: 0.2, ease: "power1.out" }, 5.02 + i * 0.04);
+      });
+      tl.to("#pool-red", { autoAlpha: 0.9, duration: 0.5, ease: "power2.out" }, 5.05);
+      // the waveform flatlines — crisp red flat line, no smear
+      tl.to("#wave-line", { scaleY: 0.02, duration: 0.45, ease: "expo.out", transformOrigin: "50% 50%" }, 5.05);
+      tl.to("#wave-line", { stroke: "rgba(255,99,92,0.75)", duration: 0.3, ease: "none" }, 5.05);
+      tl.fromTo("#label-3", { y: 14, filter: "blur(8px)" }, { y: 0, filter: "blur(0px)", duration: 0.8, ease: "power2.out" }, 5.45);
+      tl.to("#label-3", { autoAlpha: 1, duration: 0.8, ease: "power2.out" }, 5.45);
+      tl.to("#label-3", { autoAlpha: 0, duration: 0.3, ease: "power2.in" }, 6.65);
+      tl.to("#wave", { autoAlpha: 0, duration: 0.4, ease: "power2.in" }, 6.55);
+
+      /* ================= beat 4 · GREEN cascade (7.0–9.5) ================= */
+      const agents = ["#d-a1", "#d-a2", "#d-a3"];
+      const rings = ["#r-1", "#r-2", "#r-3"];
+      agents.forEach((s, i) => {
+        const t = 7.15 + i * 0.3;
+        tl.to(s, { backgroundColor: "#32d74b", boxShadow: "0 0 16px rgba(50,215,75,0.9)", duration: 0.18, ease: "power2.out" }, t);
+        tl.to(s, { scale: 1.4, duration: 0.14, ease: "power2.out", yoyo: true, repeat: 1 }, t);
+        tl.fromTo(rings[i], { scale: 0.4, autoAlpha: 0.85 }, { scale: 3.4, autoAlpha: 0, duration: 0.9, ease: "power2.out" }, t + 0.04);
+      });
+      // red spill softens so green owns the frame (mic stays muted-red on its dot)
+      ["#gr-halo", "#gr-spill"].forEach((s) => tl.to(s, { autoAlpha: 0.35, duration: 0.8, ease: "power2.inOut" }, 7.1));
+      tl.to("#pool-red", { autoAlpha: 0.3, duration: 0.8, ease: "power2.inOut" }, 7.1);
+      ["#gg-core", "#gg-halo", "#gg-spill"].forEach((s, i) => {
+        tl.fromTo(s, { scale: 0.6 }, { scale: 1, duration: 1.0, ease: "power2.out" }, 7.2 + i * 0.08);
+        tl.to(s, { autoAlpha: 1, duration: 0.8, ease: "power2.out" }, 7.2 + i * 0.08);
+      });
+      tl.to("#pool-green", { autoAlpha: 0.85, duration: 0.9, ease: "power2.out" }, 7.35);
+      // seeded motes rise like sparks off done work
+      motes.forEach((m, i) => {
+        const t = 7.3 + (i % 7) * 0.22;
+        tl.to(m, { autoAlpha: 0.9, duration: 0.2, ease: "power1.out" }, t);
+        tl.to(m, { y: -(90 + (i * 13) % 70), duration: 1.4, ease: "power1.out" }, t);
+        tl.to(m, { autoAlpha: 0, duration: 0.5, ease: "power1.in" }, t + 0.9);
+      });
+      tl.fromTo("#label-4", { y: 14, filter: "blur(8px)" }, { y: 0, filter: "blur(0px)", duration: 0.8, ease: "power2.out" }, 7.65);
+      tl.to("#label-4", { autoAlpha: 1, duration: 0.8, ease: "power2.out" }, 7.65);
+      tl.to("#label-4", { autoAlpha: 0, duration: 0.3, ease: "power2.in" }, 9.15);
+
+      /* ================= beat 5 · THE MOMENT (9.5–11.5) ================= */
+      // spilled light gathers INTO the island — color stays alive while the orbs fly
+      ["#gr-core", "#gr-halo", "#gr-spill", "#gg-core", "#gg-halo", "#gg-spill"].forEach((s) => {
+        tl.to(s, { scale: 0.22, autoAlpha: 0, duration: 1.15, ease: "power2.in" }, 9.55);
+      });
+      tl.to("#pool-red", { autoAlpha: 0, duration: 1.0, ease: "power2.in" }, 9.55);
+      tl.to("#pool-green", { autoAlpha: 0, duration: 1.0, ease: "power2.in" }, 9.55);
+
+      // three color orbs arc-converge into the pill (bigger, brighter, later arrivals)
+      const orbArcs = [
+        { sel: "#orb-o", from: { x: 380, y: 710 }, mid: { x: 520, y: 270 } },
+        { sel: "#orb-r", from: { x: 1530, y: 680 }, mid: { x: 1400, y: 250 } },
+        { sel: "#orb-g", from: { x: 960, y: 830 }, mid: { x: 660, y: 640 } },
+      ];
+      orbArcs.forEach((o, i) => {
+        const t = 9.5 + i * 0.16;
+        tl.set(o.sel, { x: o.from.x, y: o.from.y, scale: 1.5 }, t);
+        tl.to(o.sel, { autoAlpha: 1, duration: 0.18, ease: "power1.out" }, t);
+        tl.to(o.sel, {
+          keyframes: [
+            { x: o.mid.x, y: o.mid.y, scale: 1.25, duration: 0.6, ease: "power1.in" },
+            { x: 949, y: 429, scale: 0.4, duration: 0.42, ease: "power2.in" },
+          ],
+        }, t + 0.14);
+        tl.to(o.sel, { autoAlpha: 0, duration: 0.1, ease: "none" }, t + 1.06);
+        // each arrival kicks the pill
+        tl.to("#pill", { scale: 1.015, duration: 0.09, ease: "power2.out", yoyo: true, repeat: 1 }, t + 1.16);
+      });
+
+      // dots flare white as their light is absorbed
+      tl.to("#d-mic", { backgroundColor: "#f2f2f5", boxShadow: "0 0 22px rgba(255,255,255,0.8)", duration: 0.4, ease: "power2.in" }, 10.5);
+      agents.forEach((s) => tl.to(s, { backgroundColor: "#f2f2f5", boxShadow: "0 0 22px rgba(255,255,255,0.8)", duration: 0.4, ease: "power2.in" }, 10.5));
+
+      // light-streak whip races the pill's own silhouette — 2.5 fast laps, glow trailing the core
+      tl.to("#whipsvg", { autoAlpha: 1, duration: 0.1, ease: "power1.out" }, 10.35);
+      tl.to("#whip-core", { strokeDashoffset: -WL * 2.5, duration: 1.0, ease: "power1.in" }, 10.35);
+      tl.fromTo("#whip-glow", { strokeDashoffset: WL * 0.05 }, { strokeDashoffset: -WL * 2.45, duration: 1.0, ease: "power1.in" }, 10.35);
+      // rim ignites hard + energy core burns inside the pill
+      tl.to("#pill", {
+        boxShadow:
+          "inset 0 2px 0 rgba(255,255,255,0.5), inset 0 -1px 0 rgba(255,255,255,0.18), 0 0 0 3px rgba(255,255,255,0.85), 0 0 90px 24px rgba(255,255,255,0.32), 0 26px 60px rgba(0,0,0,0.6)",
+        duration: 0.85,
+        ease: "power2.in",
+      }, 10.5);
+      tl.fromTo("#core-bloom", { scale: 0.3 }, { scale: 1.6, duration: 0.75, ease: "power2.in" }, 10.7);
+      tl.to("#core-bloom", { autoAlpha: 1, duration: 0.6, ease: "power2.in" }, 10.7);
+      // white bloom swallows the frame into the hard cut at 11.5
+      tl.to("#flash", { autoAlpha: 1, duration: 0.45, ease: "power2.in" }, 11.05);
+
+      /* ================= beat 6 · lockup (11.5–15.0) ================= */
+      tl.fromTo("#pill2", { scale: 1.14, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.55, ease: "power3.out" }, 11.5);
+      // tracking wide→tight: per-glyph x spread collapsing (transform-only, seek-smooth)
+      const glyphs = gsap.utils.toArray("#wordmark .wm");
+      const mid = (glyphs.length - 1) / 2;
+      glyphs.forEach((g, i) => {
+        tl.fromTo(g, { x: (i - mid) * 26 }, { x: 0, duration: 1.15, ease: "expo.out" }, 11.85);
+      });
+      tl.fromTo("#wordmark", { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, duration: 1.0, ease: "expo.out" }, 11.85);
+      tl.fromTo(
+        "#principle",
+        { autoAlpha: 0, filter: "blur(8px)", y: 10 },
+        { autoAlpha: 1, filter: "blur(0px)", y: 0, duration: 0.9, ease: "power2.out" },
+        12.65
+      );
+      tl.fromTo("#github", { autoAlpha: 0 }, { autoAlpha: 0.95, duration: 0.7, ease: "power2.out" }, 13.35);
+      // held breath to the end — 1s clean hold
+      tl.to("#pill2", { scale: 1.012, duration: 1.4, ease: "sine.inOut" }, 13.6);
+
+      /* ---- deterministic grain jitter (stepped, finite) ---- */
+      tl.to("#grain", {
+        keyframes: [
+          { x: -14, y: 8, duration: 0.24 }, { x: 10, y: -12, duration: 0.24 },
+          { x: -6, y: -16, duration: 0.24 }, { x: 16, y: 6, duration: 0.24 },
+          { x: -12, y: 14, duration: 0.24 }, { x: 4, y: -8, duration: 0.24 },
+          { x: 14, y: 12, duration: 0.24 }, { x: 0, y: 0, duration: 0.24 },
+        ],
+        ease: "none",
+        repeat: 6,
+      }, 0);
+
+      tl.seek(0);
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
