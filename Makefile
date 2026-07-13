@@ -1,5 +1,5 @@
 APP_NAME = NotchControls
-VERSION  = 0.3.0
+VERSION  = 0.4.0
 BUNDLE   = build/$(APP_NAME).app
 BINARY   = .build/release/$(APP_NAME)
 

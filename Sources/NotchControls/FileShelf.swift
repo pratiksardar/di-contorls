@@ -16,6 +16,11 @@ final class ShelfStore: ObservableObject {
             .filter { FileManager.default.fileExists(atPath: $0.path) }
     }
 
+    /// iCloud Drive is just a folder — copying here makes files appear in the
+    /// Files app on every device signed into the same Apple ID.
+    static let icloudDir = FileManager.default.homeDirectoryForCurrentUser
+        .appendingPathComponent("Library/Mobile Documents/com~apple~CloudDocs/NotchControls Shelf")
+
     func add(_ urls: [URL]) {
         var next = items
         for url in urls where !next.contains(url) {
@@ -24,6 +29,20 @@ final class ShelfStore: ObservableObject {
         if next.count > Self.cap { next.removeLast(next.count - Self.cap) }
         items = next
         persist()
+        if Pref.enabled(Pref.icloudShelf) {
+            mirrorToICloud(urls)
+        }
+    }
+
+    private func mirrorToICloud(_ urls: [URL]) {
+        let fm = FileManager.default
+        try? fm.createDirectory(at: Self.icloudDir, withIntermediateDirectories: true)
+        for url in urls {
+            let dest = Self.icloudDir.appendingPathComponent(url.lastPathComponent)
+            if !fm.fileExists(atPath: dest.path) {
+                try? fm.copyItem(at: url, to: dest)
+            }
+        }
     }
 
     func remove(_ url: URL) {
@@ -62,10 +81,15 @@ struct ShelfChip: View {
         .hoverGlow(9)
         .onDrag { NSItemProvider(contentsOf: url) ?? NSItemProvider() }
         .contextMenu {
-            Button("Remove from shelf") { store.remove(url) }
+            Button("AirDrop…") {
+                NSApp.activate(ignoringOtherApps: true)
+                NSSharingService(named: .sendViaAirDrop)?.perform(withItems: [url])
+            }
             Button("Reveal in Finder") {
                 NSWorkspace.shared.activateFileViewerSelecting([url])
             }
+            Divider()
+            Button("Remove from shelf") { store.remove(url) }
         }
         .help("Drag out to drop anywhere · right-click for options")
     }

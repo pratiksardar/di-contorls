@@ -22,6 +22,10 @@ enum Pref {
     static let mutedProjects = "pref.mutedProjects"
     static let fileShelf = "pref.fileShelf"
     static let cameraGuard = "pref.cameraGuard"
+    static let icloudShelf = "pref.icloudShelf"
+    static let islandSize = "pref.islandSize" // "compact" | "standard" | "roomy"
+    static let showGuardButton = "pref.showGuardButton"
+    static let showHistoryButton = "pref.showHistoryButton"
 
     static func mutedProjectList() -> [String] {
         UserDefaults.standard.stringArray(forKey: mutedProjects) ?? []
@@ -55,6 +59,10 @@ enum Pref {
         subagentBadge: true,
         fileShelf: true,
         cameraGuard: false,
+        icloudShelf: false,
+        islandSize: "standard",
+        showGuardButton: true,
+        showHistoryButton: true,
     ]
 
     static func enabled(_ key: String) -> Bool {
@@ -103,6 +111,10 @@ struct SettingsView: View {
     @AppStorage(Pref.subagentBadge) private var subagentBadge = true
     @AppStorage(Pref.fileShelf) private var fileShelf = true
     @AppStorage(Pref.cameraGuard) private var cameraGuard = false
+    @AppStorage(Pref.icloudShelf) private var icloudShelf = false
+    @AppStorage(Pref.islandSize) private var islandSize = "standard"
+    @AppStorage(Pref.showGuardButton) private var showGuardButton = true
+    @AppStorage(Pref.showHistoryButton) private var showHistoryButton = true
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
     @State private var mutedProjects = Pref.mutedProjectList()
 
@@ -117,6 +129,17 @@ struct SettingsView: View {
                 .pickerStyle(.segmented)
                 .onChange(of: appearance) { _, _ in ThemeApplier.apply() }
             }
+            Section("Island") {
+                Picker("Island size", selection: $islandSize) {
+                    Text("Compact").tag("compact")
+                    Text("Standard").tag("standard")
+                    Text("Roomy").tag("roomy")
+                }
+                .pickerStyle(.segmented)
+                .help("Applies the next time the island opens")
+                Toggle("Guard button in the island", isOn: $showGuardButton)
+                Toggle("History button in the island", isOn: $showHistoryButton)
+            }
             Section("Island modules") {
                 Toggle("Camera in-use indicator", isOn: $cameraIndicator)
                 Toggle("Teleprompter button", isOn: $showTeleprompter)
@@ -124,6 +147,8 @@ struct SettingsView: View {
                 Toggle("File shelf (drop files on the notch)", isOn: $fileShelf)
                 Toggle("Camera Guard (alert when camera turns on)", isOn: $cameraGuard)
                     .help("macOS doesn't let apps switch the camera off system-wide — the guard alerts you the instant any app starts it")
+                Toggle("Mirror shelf to iCloud Drive", isOn: $icloudShelf)
+                    .help("Copies dropped files into iCloud Drive › NotchControls Shelf — they appear in the Files app on every device signed into your Apple ID")
             }
             Section("Sessions") {
                 Toggle("Per-project name colors", isOn: $projectColors)
@@ -203,11 +228,11 @@ struct SettingsView: View {
                         }
                     }
                 LabeledContent("System-wide mic mute", value: "⌥⇧M")
-                LabeledContent("Version", value: "0.3.0")
+                LabeledContent("Version", value: "0.4.0")
             }
         }
         .formStyle(.grouped)
-        .frame(width: 440, height: 620)
+        .frame(width: 440, height: 760)
         .onAppear { mutedProjects = Pref.mutedProjectList() }
     }
 

@@ -20,6 +20,8 @@ struct NotchView: View {
     @AppStorage(Pref.subagentBadge) private var subagentBadge = true
     @AppStorage(Pref.fileShelf) private var fileShelf = true
     @AppStorage(Pref.cameraGuard) private var cameraGuard = false
+    @AppStorage(Pref.showGuardButton) private var showGuardButton = true
+    @AppStorage(Pref.showHistoryButton) private var showHistoryButton = true
 
     var body: some View {
         VStack(spacing: 0) {
@@ -439,7 +441,7 @@ struct NotchView: View {
                     symbol: audio.isMuted ? "mic.slash.fill" : "mic.fill",
                     tint: audio.isMuted ? Color.red : Color.white.opacity(0.14),
                     action: audio.toggleMute)
-                if cameraIndicator {
+                if cameraIndicator, showGuardButton {
                     islandButton(
                         title: cameraGuard ? "Guarded" : "Guard",
                         symbol: cameraGuard ? "video.badge.checkmark" : "video",
@@ -471,6 +473,7 @@ struct NotchView: View {
                 Text(micStatusText)
                     .font(.caption)
                     .foregroundStyle(micColor)
+                if showHistoryButton {
                 Button {
                     withAnimation(reduceMotion ? nil : .easeOut(duration: 0.15)) {
                         state.showHistory.toggle()
@@ -485,6 +488,7 @@ struct NotchView: View {
                 .buttonStyle(.plain)
                 .hoverGlow(6)
                 .help("Recent activity")
+                }
                 Button(action: openSettings) {
                     Image(systemName: "gearshape.fill")
                         .font(.system(size: 11))

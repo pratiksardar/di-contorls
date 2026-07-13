@@ -61,6 +61,22 @@
 - Multi-display polish, module reordering, hotkey customization, localization
 - Optional paid tier decision point (align with seam's $19.90 one-time precedent; core stays OSS)
 
+## Be-the-best gap plan (competitor comparison → build order)
+
+What each neighbor does better than us today, and the counter-move (✅ = closed as of v0.4.0):
+
+| Competitor | Their edge | Our counter | Status |
+|---|---|---|---|
+| boring.notch (5k★) | File shelf, media controls, HUD replacement, big community | Shelf ✅ (+ iCloud mirroring + AirDrop they DON'T have); media/HUD as community modules post-SDK; win on stability + purpose | shelf ✅, SDK pending |
+| NotchNook / seam | Deep customization; seam's focus sessions + polish | Island sizing + button visibility ✅; per-module toggles ✅; focus/pomodoro pending | sizing ✅ |
+| so-agentbar | Token/cost + quota tracking, session states, editor deep-links, subagent detail | States ✅, right-click open-in ✅, subagent badges ✅; **quota/cost is the biggest open gap** | quota ❌ (top priority) |
+| c9watch | Zero-setup process discovery | Same technique ✅ + hooks as enrichment ✅ | ✅ |
+| Textream / Tele | Voice-follow + word-tracking prompter, .pptx import, phone remote | **Voice-follow is the #2 open gap**; capture-invisibility ✅ matches them | voice ❌ |
+| OverSight | Mic/camera on/off alerting with per-app attribution | Camera Guard ✅; **per-app attribution** (which app grabbed the camera) pending | guard ✅, attribution ❌ |
+| Alcove (paid) | Polish, notarized, Sparkle updates | Developer ID + notarization + Sparkle — the only money-gated item ($99/yr) | ❌ |
+
+**Build order to "best overall":** 1) per-session token/cost + quota alerts (kills the entire usage-meter category), 2) voice-follow prompter (kills the prompter category), 3) per-app camera/mic attribution (kills OverSight), 4) module SDK (lets the community out-build boring.notch's widget set), 5) sign + notarize + cask (distribution parity with paid apps).
+
 ## Borrowed inspiration (validated by neighbors, adapted to our thesis)
 
 **From so-agentbar → v0.2/v0.4:**

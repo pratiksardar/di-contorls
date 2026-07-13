@@ -39,8 +39,27 @@ final class NotchController {
     private var collapseWork: DispatchWorkItem?
     private var bannerWork: DispatchWorkItem?
     private var collapsedSize: CGSize
-    private let expandedSize = CGSize(width: 420, height: 420)
-    private let tallSize = CGSize(width: 420, height: 580) // full session list open
+
+    /// User-selected island scale (Settings → Island size).
+    private struct SizeSpec {
+        let extraWidth: CGFloat // beyond the physical notch, collapsed
+        let expanded: CGSize
+        let tall: CGSize
+    }
+
+    private var sizeSpec: SizeSpec {
+        switch UserDefaults.standard.string(forKey: Pref.islandSize) {
+        case "compact": return SizeSpec(extraWidth: 60, expanded: CGSize(width: 380, height: 370),
+                                        tall: CGSize(width: 380, height: 510))
+        case "roomy": return SizeSpec(extraWidth: 150, expanded: CGSize(width: 490, height: 480),
+                                      tall: CGSize(width: 490, height: 660))
+        default: return SizeSpec(extraWidth: 96, expanded: CGSize(width: 420, height: 420),
+                                 tall: CGSize(width: 420, height: 580))
+        }
+    }
+
+    private var expandedSize: CGSize { sizeSpec.expanded }
+    private var tallSize: CGSize { sizeSpec.tall }
     private var hovering = false
     private var cancellables = Set<AnyCancellable>()
     private let agentEvents: AgentEventCenter
@@ -50,7 +69,7 @@ final class NotchController {
          openTeleprompter: @escaping () -> Void,
          openSettings: @escaping () -> Void) {
         self.agentEvents = agentEvents
-        collapsedSize = Self.collapsedSize(for: Self.targetScreen())
+        collapsedSize = Self.collapsedSize(for: Self.targetScreen(), extra: 96)
         let root = NotchView(audio: audio,
                              camera: camera,
                              agentEvents: agentEvents,
@@ -93,7 +112,7 @@ final class NotchController {
             object: nil, queue: .main
         ) { [weak self] _ in
             guard let self else { return }
-            self.collapsedSize = Self.collapsedSize(for: Self.targetScreen())
+            self.collapsedSize = Self.collapsedSize(for: Self.targetScreen(), extra: self.sizeSpec.extraWidth)
             self.applyFrame(expanded: self.state.expanded, animate: false)
         }
     }
@@ -150,6 +169,7 @@ final class NotchController {
 
     private func applyFrame(expanded: Bool, animate: Bool) {
         guard let screen = Self.targetScreen() else { return }
+        collapsedSize = Self.collapsedSize(for: screen, extra: sizeSpec.extraWidth)
         let size = expanded ? (state.showAllSessions ? tallSize : expandedSize) : collapsedSize
         let rect = NSRect(x: screen.frame.midX - size.width / 2,
                           y: screen.frame.maxY - size.height,
@@ -162,14 +182,14 @@ final class NotchController {
         NSScreen.screens.first { $0.safeAreaInsets.top > 0 } ?? NSScreen.main ?? NSScreen.screens.first
     }
 
-    private static func collapsedSize(for screen: NSScreen?) -> CGSize {
-        guard let screen else { return CGSize(width: 280, height: 32) }
+    private static func collapsedSize(for screen: NSScreen?, extra: CGFloat) -> CGSize {
+        guard let screen else { return CGSize(width: 184 + extra, height: 32) }
         let inset = screen.safeAreaInsets.top
         if inset > 0, let left = screen.auxiliaryTopLeftArea, let right = screen.auxiliaryTopRightArea {
             // wider than the physical notch so the indicators peek out at the sides
             let notchWidth = screen.frame.width - left.width - right.width
-            return CGSize(width: notchWidth + 96, height: inset)
+            return CGSize(width: notchWidth + extra, height: inset)
         }
-        return CGSize(width: 280, height: 32)
+        return CGSize(width: 184 + extra, height: 32)
     }
 }

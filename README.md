@@ -35,9 +35,9 @@ NotchControls turns the MacBook notch into a cockpit for your work session.
 | 🤖 **Agent notifications** | Claude Code / Codex banners the second a session needs input or finishes. Click a banner → land in the owning window. Coalesced, per-project mutable, meeting-aware (holds while your mic/camera is live) + quiet hours. |
 | 📊 **Live session fleet** | Every `claude`/`codex` session on your machine: working / idle / **needs-you**, project names in stable per-project colors, subagent counts, right-click → open in your editor. |
 | 📜 **Invisible teleprompter** | A prompter right under the camera that is **invisible in screen shares and recordings** — Zoom, Meet, OBS see nothing. Drag-to-scrub, live speed keys, font styles, `.md` import. |
-| 🗂️ **File shelf** | Drag files onto the notch to stash them; drag them out anywhere later. |
-| 📷 **Camera indicator** | Green dot the moment any app opens a camera. |
-| 🎛️ **Yours to shape** | Per-module toggles, System/Light/Dark themes, launch at login. MIT, zero dependencies. |
+| 🗂️ **File shelf** | Drag files onto the notch to stash them; drag them out anywhere later. **AirDrop** any chip, or mirror the shelf to **iCloud Drive** so files appear in the Files app on every device signed into your Apple ID. |
+| 📷 **Camera Guard** | Green dot the moment any app opens a camera — and an armable guard that pops an urgent alert the *instant* your camera goes live (even during meetings). |
+| 🎛️ **Yours to shape** | Island size (Compact/Standard/Roomy), choose which buttons live in the island, per-module toggles, System/Light/Dark themes, launch at login. MIT, zero dependencies. |
 
 ## Install
 
