@@ -26,6 +26,7 @@ enum Pref {
     static let islandSize = "pref.islandSize" // "compact" | "standard" | "roomy"
     static let showGuardButton = "pref.showGuardButton"
     static let showHistoryButton = "pref.showHistoryButton"
+    static let guardBlockMode = "pref.guardBlockMode"
 
     static func mutedProjectList() -> [String] {
         UserDefaults.standard.stringArray(forKey: mutedProjects) ?? []
@@ -63,6 +64,7 @@ enum Pref {
         islandSize: "standard",
         showGuardButton: true,
         showHistoryButton: true,
+        guardBlockMode: false,
     ]
 
     static func enabled(_ key: String) -> Bool {
@@ -115,6 +117,7 @@ struct SettingsView: View {
     @AppStorage(Pref.islandSize) private var islandSize = "standard"
     @AppStorage(Pref.showGuardButton) private var showGuardButton = true
     @AppStorage(Pref.showHistoryButton) private var showHistoryButton = true
+    @AppStorage(Pref.guardBlockMode) private var guardBlockMode = false
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
     @State private var mutedProjects = Pref.mutedProjectList()
 
@@ -146,7 +149,10 @@ struct SettingsView: View {
                 Toggle("Running agent sessions list", isOn: $showSessions)
                 Toggle("File shelf (drop files on the notch)", isOn: $fileShelf)
                 Toggle("Camera Guard (alert when camera turns on)", isOn: $cameraGuard)
-                    .help("macOS doesn't let apps switch the camera off system-wide — the guard alerts you the instant any app starts it")
+                    .help("macOS doesn't let apps switch the camera off system-wide — the guard alerts you the instant any app starts it. Toggle anywhere with ⌥⇧G.")
+                Toggle("Guard Block mode: auto-quit the camera app", isOn: $guardBlockMode)
+                    .disabled(!cameraGuard)
+                    .help("AGGRESSIVE: the moment any app starts the camera, NotchControls quits that app — ending your call. Quitting the app is the only way any macOS app can actually stop the camera.")
                 Toggle("Mirror shelf to iCloud Drive", isOn: $icloudShelf)
                     .help("Copies dropped files into iCloud Drive › NotchControls Shelf — they appear in the Files app on every device signed into your Apple ID")
             }

@@ -21,7 +21,10 @@ final class NotchPanel: NSPanel {
         collectionBehavior = [.canJoinAllSpaces, .stationary, .fullScreenAuxiliary]
     }
 
-    override var canBecomeKey: Bool { false }
+    // Non-activating + can-become-key is the load-bearing combo: the panel takes
+    // clicks (SwiftUI buttons need key-capable windows) WITHOUT activating the
+    // app or stealing focus from the user's meeting.
+    override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { false }
 }
 

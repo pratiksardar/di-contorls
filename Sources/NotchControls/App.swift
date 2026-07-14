@@ -11,7 +11,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let teleprompter = TeleprompterController()
     private var statusItem: NSStatusItem?
     private var muteMenuItem: NSMenuItem?
+    private var guardMenuItem: NSMenuItem?
     private var hotKey: HotKey?
+    private var guardHotKey: HotKey?
     private var cancellables = Set<AnyCancellable>()
 
     private let agentEvents = AgentEventCenter()
@@ -45,6 +47,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                         modifiers: UInt32(optionKey | shiftKey)) { [weak self] in
             self?.audio.toggleMute()
         }
+        guardHotKey = HotKey(keyCode: UInt32(kVK_ANSI_G),
+                             modifiers: UInt32(optionKey | shiftKey)) {
+            UserDefaults.standard.set(!Pref.enabled(Pref.cameraGuard), forKey: Pref.cameraGuard)
+        }
         DistributedNotificationCenter.default().addObserver(
             forName: NotifyCLI.commandNotification, object: nil, queue: .main
         ) { [weak self] note in
@@ -75,9 +81,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             .sink { [weak self] live in
                 guard let self else { return }
                 if live, Pref.enabled(Pref.cameraGuard) {
-                    self.agentEvents.ingest(agent: "Camera Guard", kind: .attention,
-                                            message: "Your camera just went live",
-                                            urgent: true)
+                    // Block mode: quitting the app is the only real camera stop on macOS
+                    if Pref.enabled(Pref.guardBlockMode),
+                       let culprit = CameraAttribution.likelySuspects().first {
+                        culprit.terminate()
+                        self.agentEvents.ingest(
+                            agent: "Camera Guard", kind: .attention,
+                            message: "Blocked: quit \(culprit.localizedName ?? "the app") to stop the camera",
+                            urgent: true)
+                    } else {
+                        self.agentEvents.ingest(agent: "Camera Guard", kind: .attention,
+                                                message: "Your camera just went live",
+                                                urgent: true)
+                    }
                 } else if !live {
                     self.agentEvents.dismissAll(agent: "Camera Guard")
                 }
@@ -105,6 +121,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(mute)
         muteMenuItem = mute
 
+        let guardItem = NSMenuItem(title: "Camera Guard",
+                                   action: #selector(toggleGuardAction), keyEquivalent: "")
+        guardItem.target = self
+        menu.addItem(guardItem)
+        guardMenuItem = guardItem
+
         let prompter = NSMenuItem(title: "Toggle Teleprompter",
                                   action: #selector(toggleTeleprompterAction), keyEquivalent: "")
         prompter.target = self
@@ -130,6 +152,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         teleprompter.toggle()
     }
 
+    @objc private func toggleGuardAction() {
+        UserDefaults.standard.set(!Pref.enabled(Pref.cameraGuard), forKey: Pref.cameraGuard)
+    }
+
     @objc private func openSettingsAction() {
         settings.show()
     }
@@ -139,5 +165,7 @@ extension AppDelegate: NSMenuDelegate {
     func menuNeedsUpdate(_ menu: NSMenu) {
         muteMenuItem?.title = audio.isMuted ? "Unmute Microphone" : "Mute Microphone"
         muteMenuItem?.state = audio.isMuted ? .on : .off
+        guardMenuItem?.title = Pref.enabled(Pref.cameraGuard) ? "Camera Guard (armed)" : "Camera Guard"
+        guardMenuItem?.state = Pref.enabled(Pref.cameraGuard) ? .on : .off
     }
 }
