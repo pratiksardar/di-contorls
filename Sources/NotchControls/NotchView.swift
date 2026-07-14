@@ -195,10 +195,15 @@ struct NotchView: View {
                 .hoverGlow(10)
                 .contextMenu {
                     if event.agent == "Camera Guard" {
-                        // quitting the app is the only real way to stop the camera on macOS
+                        Button("Stop camera (close meeting tab / quit app)") {
+                            let outcome = CameraAttribution.stopCamera()
+                            agentEvents.ingest(agent: "Camera Guard", kind: .done,
+                                               message: outcome)
+                        }
+                        Divider()
                         ForEach(CameraAttribution.likelySuspects(), id: \.processIdentifier) { app in
-                            Button("Quit \(app.localizedName ?? "app") (stops the camera)") {
-                                app.terminate()
+                            Button("Quit \(app.localizedName ?? "app")") {
+                                if !app.terminate() { app.forceTerminate() }
                             }
                         }
                     }

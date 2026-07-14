@@ -68,9 +68,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let now = Pref.enabled(Pref.cameraGuard)
             defer { lastGuard = now }
             guard let self, now, !lastGuard, self.camera.cameraInUse else { return }
-            self.agentEvents.ingest(agent: "Camera Guard", kind: .attention,
-                                    message: "Camera is live right now — right-click to stop an app",
-                                    urgent: true)
+            if Pref.enabled(Pref.guardBlockMode) {
+                let outcome = CameraAttribution.stopCamera()
+                self.agentEvents.ingest(agent: "Camera Guard", kind: .attention,
+                                        message: outcome, urgent: true)
+            } else {
+                self.agentEvents.ingest(agent: "Camera Guard", kind: .attention,
+                                        message: "Camera is live right now — right-click to stop it",
+                                        urgent: true)
+            }
         }
 
         // camera guard: urgent banner the instant any app turns the camera on
@@ -81,14 +87,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             .sink { [weak self] live in
                 guard let self else { return }
                 if live, Pref.enabled(Pref.cameraGuard) {
-                    // Block mode: quitting the app is the only real camera stop on macOS
-                    if Pref.enabled(Pref.guardBlockMode),
-                       let culprit = CameraAttribution.likelySuspects().first {
-                        culprit.terminate()
-                        self.agentEvents.ingest(
-                            agent: "Camera Guard", kind: .attention,
-                            message: "Blocked: quit \(culprit.localizedName ?? "the app") to stop the camera",
-                            urgent: true)
+                    if Pref.enabled(Pref.guardBlockMode) {
+                        let outcome = CameraAttribution.stopCamera()
+                        self.agentEvents.ingest(agent: "Camera Guard", kind: .attention,
+                                                message: outcome, urgent: true)
                     } else {
                         self.agentEvents.ingest(agent: "Camera Guard", kind: .attention,
                                                 message: "Your camera just went live",
