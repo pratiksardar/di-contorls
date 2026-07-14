@@ -58,12 +58,18 @@ struct NotchView: View {
                     Button {
                         cameraGuard.toggle()
                     } label: {
-                        Image(systemName: cameraGuard ? "video.badge.checkmark" : "video.fill")
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundStyle(camera.cameraInUse ? .green
-                                             : cameraGuard ? .orange : .white.opacity(0.25))
-                            .frame(width: 24, height: 24)
-                            .contentShape(Rectangle())
+                        ZStack(alignment: .topTrailing) {
+                            Image(systemName: cameraGuard ? "video.badge.checkmark" : "video.fill")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundStyle(camera.cameraInUse ? .green
+                                                 : cameraGuard ? .orange : .white.opacity(0.25))
+                            if cameraGuard {
+                                // guard state stays visible even while the camera is live (green)
+                                Circle().fill(.orange).frame(width: 5, height: 5).offset(x: 3, y: -2)
+                            }
+                        }
+                        .frame(width: 24, height: 24)
+                        .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                     .hoverGlow(6)
@@ -188,6 +194,14 @@ struct NotchView: View {
                             in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                 .hoverGlow(10)
                 .contextMenu {
+                    if event.agent == "Camera Guard" {
+                        // quitting the app is the only real way to stop the camera on macOS
+                        ForEach(CameraAttribution.likelySuspects(), id: \.processIdentifier) { app in
+                            Button("Quit \(app.localizedName ?? "app") (stops the camera)") {
+                                app.terminate()
+                            }
+                        }
+                    }
                     if let dir = event.directory {
                         Button("Mute \(event.directoryName ?? "this project")") {
                             Pref.mute(project: dir)

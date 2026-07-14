@@ -25,6 +25,12 @@ final class NotchPanel: NSPanel {
     override var canBecomeMain: Bool { false }
 }
 
+/// The island never becomes key, so without this the FIRST click on any
+/// control is swallowed by window-activation handling — buttons feel dead.
+final class FirstMouseHostingView<Content: View>: NSHostingView<Content> {
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+}
+
 final class NotchState: ObservableObject {
     @Published var expanded = false
     @Published var showAllSessions = false
@@ -79,7 +85,7 @@ final class NotchController {
                              collapsedHeight: collapsedSize.height,
                              openTeleprompter: openTeleprompter,
                              openSettings: openSettings)
-        let hosting = NSHostingView(rootView: root)
+        let hosting = FirstMouseHostingView(rootView: root)
         hosting.sizingOptions = [] // window frame is managed by applyFrame, not SwiftUI
         panel.contentView = hosting
         state.onHover = { [weak self] hovering in self?.setHover(hovering) }

@@ -54,6 +54,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             default: break
             }
         }
+        // arming the guard while the camera is ALREADY live must alert immediately
+        var lastGuard = Pref.enabled(Pref.cameraGuard)
+        NotificationCenter.default.addObserver(
+            forName: UserDefaults.didChangeNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            let now = Pref.enabled(Pref.cameraGuard)
+            defer { lastGuard = now }
+            guard let self, now, !lastGuard, self.camera.cameraInUse else { return }
+            self.agentEvents.ingest(agent: "Camera Guard", kind: .attention,
+                                    message: "Camera is live right now — right-click to stop an app",
+                                    urgent: true)
+        }
+
         // camera guard: urgent banner the instant any app turns the camera on
         camera.$cameraInUse
             .removeDuplicates()
